@@ -1,0 +1,63 @@
+:root {
+    --navbar-brand: #ff8000;
+    --navbar-active: #ff8050;
+}
+
+body {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    margin: 0;
+}
+
+/* Use Bootstrap-like class names so integrating Bootstrap later is easy */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.5rem 1rem;
+    gap: 1rem;
+    background: transparent;
+}
+
+.navbar-brand {
+    color: var(--navbar-brand) !important;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.navbar-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.nav-link {
+    color: inherit;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.nav-link.active {
+    color: var(--navbar-active);
+}
+
+/* Small responsive tweak: stack on very small screens */
+@media (max-width: 480px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+.container {
+    margin-left: 1em;
+}
