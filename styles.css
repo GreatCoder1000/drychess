@@ -1,5 +1,5 @@
 :root {
-    --navbar-active: #ff8050;
+    --pumpkin: #ff8050;
 }
 
 body {
@@ -18,7 +18,7 @@ body {
 }
 
 .navbar-brand {
-    color: var(--navbar-brand) !important;
+    color: var(--pumpkin) !important;
     font-weight: bold;
     text-decoration: none;
     font-size: 1.1rem;
@@ -59,4 +59,8 @@ body {
 
 .container {
     margin-left: 1em;
+}
+
+h1, h2, h3 {
+    color: var(--pumpkin)
 }
