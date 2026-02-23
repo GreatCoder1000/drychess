@@ -1,0 +1,48 @@
+---
+layout: default
+title: Login
+---
+<div class="container" style="max-width: 400px; margin-top: 2rem;">
+  <h2>Passwordless Login</h2>
+
+  <input id="email" type="email" placeholder="Email" class="form-control">
+
+  <button onclick="sendLink()" class="btn btn-primary" style="margin-top:10px;">
+    Send Login Link
+  </button>
+</div>
+
+<script>
+function sendLink() {
+  const email = document.getElementById("email").value;
+
+  const actionCodeSettings = {
+    url: window.location.origin + '/login.html',
+    handleCodeInApp: true
+  };
+
+  firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings)
+    .then(() => {
+      alert("Login link sent! Check your email.");
+      window.localStorage.setItem('emailForSignIn', email);
+    })
+    .catch(error => alert(error.message));
+}
+</script>
+<script>
+if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
+  let email = window.localStorage.getItem('emailForSignIn');
+
+  if (!email) {
+    email = window.prompt('Please confirm your email for login');
+  }
+
+  firebase.auth().signInWithEmailLink(email, window.location.href)
+    .then(() => {
+      window.localStorage.removeItem('emailForSignIn');
+      alert("Logged in!");
+      window.location.href = "/";
+    })
+    .catch(error => alert(error.message));
+}
+</script>
