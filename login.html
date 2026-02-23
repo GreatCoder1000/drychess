@@ -2,47 +2,72 @@
 layout: default
 title: Login
 ---
+
 <div class="container" style="max-width: 400px; margin-top: 2rem;">
-  <h2>Passwordless Login</h2>
+    <h2>Passwordless Login</h2>
 
-  <input id="email" type="email" placeholder="Email" class="form-control">
+    <p>Enter your email and we’ll send you a secure login link.</p>
 
-  <button onclick="sendLink()" class="btn btn-primary" style="margin-top:10px;">
-    Send Login Link
-  </button>
+    <input id="email" type="email" placeholder="Email" class="form-control">
+
+    <button id="sendLinkBtn" class="btn btn-primary" style="margin-top:10px;">
+        Send Login Link
+    </button>
+
+    <p id="status" style="margin-top: 1rem; color: #ff8800;"></p>
 </div>
 
-<script>
-function sendLink() {
-  const email = document.getElementById("email").value;
+<script type="module">
+    import {
+        sendSignInLinkToEmail,
+        isSignInWithEmailLink,
+        signInWithEmailLink
+    } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-  const actionCodeSettings = {
-    url: window.location.origin + '/login.html',
-    handleCodeInApp: true
-  };
+    // Firebase Auth instance from default.html
+    const auth = window.auth;
 
-  firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings)
-    .then(() => {
-      alert("Login link sent! Check your email.");
-      window.localStorage.setItem('emailForSignIn', email);
-    })
-    .catch(error => alert(error.message));
-}
-</script>
-<script>
-if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
-  let email = window.localStorage.getItem('emailForSignIn');
+    const actionCodeSettings = {
+        url: window.location.origin + '/drychess/login.html',
+        handleCodeInApp: true
+    };
 
-  if (!email) {
-    email = window.prompt('Please confirm your email for login');
-  }
+    // Send login link
+    document.getElementById("sendLinkBtn").onclick = () => {
+        const email = document.getElementById("email").value;
+        const status = document.getElementById("status");
 
-  firebase.auth().signInWithEmailLink(email, window.location.href)
-    .then(() => {
-      window.localStorage.removeItem('emailForSignIn');
-      alert("Logged in!");
-      window.location.href = "/";
-    })
-    .catch(error => alert(error.message));
-}
+        if (!email) {
+            status.textContent = "Please enter an email.";
+            return;
+        }
+
+        sendSignInLinkToEmail(auth, email, actionCodeSettings)
+            .then(() => {
+                status.textContent = "Login link sent! Check your email.";
+                window.localStorage.setItem('emailForSignIn', email);
+            })
+            .catch(error => {
+                status.textContent = error.message;
+            });
+    };
+
+    // Handle clicking the email link
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+        let email = window.localStorage.getItem('emailForSignIn');
+
+        if (!email) {
+            email = window.prompt('Please confirm your email for login');
+        }
+
+        signInWithEmailLink(auth, email, window.location.href)
+            .then(() => {
+                window.localStorage.removeItem('emailForSignIn');
+                alert("Logged in!");
+                window.location.href = "/";
+            })
+            .catch(error => {
+                document.getElementById("status").textContent = error.message;
+            });
+    }
 </script>
