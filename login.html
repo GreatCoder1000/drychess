@@ -61,6 +61,7 @@ title: Login
     document.getElementById("loginBtn").onclick = async () => {
         try {
             await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+            window.location.href = "/drychess/index.html";
             status.textContent = "Logged in!";
         } catch (err) {
             status.textContent = err.message;
