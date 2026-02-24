@@ -8,7 +8,7 @@
     <title>DryBlob - {{ page.title }}</title>
 
     <!--Styles-->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ '/styles.css' | relative_url }}">
@@ -31,7 +31,16 @@
             <li class="nav-item"><a class="nav-link" href="{{ '/learn.html' | relative_url }}">LEARN</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ '/watch.html' | relative_url }}">WATCH</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ '/community.html' | relative_url }}">COMMUNITY</a></li>
-            <li class="nav-item"><a id="navUser" class="nav-link" href="{{ '/login.html' | relative_url }}">LOGIN</a></li>
+
+            <!-- LOGIN / USER -->
+            <li class="nav-item">
+                <a id="navUser" class="nav-link" href="{{ '/login.html' | relative_url }}">LOGIN</a>
+            </li>
+
+            <!-- LOGOUT (hidden until logged in) -->
+            <li class="nav-item">
+                <a id="logoutBtn" class="nav-link" href="#" style="display:none;">LOGOUT</a>
+            </li>
         </ul>
     </nav>
 
@@ -45,95 +54,73 @@
         Made with GitHub Pages, Jekyll &amp; Firebase.
     </footer>
 
+    <!-- CLEAN GLOBAL FIREBASE SCRIPT -->
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc 
+        } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAA3Q_Mga_bP2Ef_4EfLTCABZ6XoXsJl68",
-        authDomain: "drychess-ffad8.firebaseapp.com",
-        projectId: "drychess-ffad8",
-        storageBucket: "drychess-ffad8.firebasestorage.app",
-        messagingSenderId: "749342832579",
-        appId: "1:749342832579:web:f3cea2d3b38bc3c48d6f76"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAA3Q_Mga_bP2Ef_4EfLTCABZ6XoXsJl68",
+            authDomain: "drychess-ffad8.firebaseapp.com",
+            projectId: "drychess-ffad8",
+            storageBucket: "drychess-ffad8.firebasestorage.app",
+            messagingSenderId: "749342832579",
+            appId: "1:749342832579:web:f3cea2d3b38bc3c48d6f76"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // Make auth available to all pages
-    window.auth = auth;
+        // Expose globally
+        window.auth = auth;
+        window.db = db;
 
-    // Navbar update
-    const navUser = document.getElementById("navUser");
-    const logoutBtn = document.getElementById("logoutBtn");
+        const navUser = document.getElementById("navUser");
+        const logoutBtn = document.getElementById("logoutBtn");
 
-    onAuthStateChanged(auth, user => {
-        if (!navUser) return;
+        // Update navbar on login/logout
+        onAuthStateChanged(auth, async user => {
+            if (!navUser) return;
 
-        if (user) {
-            navUser.textContent = user.email;
-            navUser.href = "#";
-            if (logoutBtn) logoutBtn.style.display = "block";
-        } else {
-            navUser.textContent = "LOGIN";
-            navUser.href = "/drychess/login.html";
-            if (logoutBtn) logoutBtn.style.display = "none";
+            if (user) {
+                let label = user.email;
+
+                // Try to load nickname
+                try {
+                    const ref = doc(db, "users", user.uid);
+                    const snap = await getDoc(ref);
+                    if (snap.exists() && snap.data().nickname) {
+                        label = snap.data().nickname;
+                    }
+                } catch {}
+
+                navUser.textContent = label;
+                navUser.href = "#";
+
+                if (logoutBtn) logoutBtn.style.display = "block";
+            } else {
+                navUser.textContent = "LOGIN";
+                navUser.href = "/drychess/login.html";
+
+                if (logoutBtn) logoutBtn.style.display = "none";
+            }
+        });
+
+        // Logout handler
+        if (logoutBtn) {
+            logoutBtn.onclick = () => signOut(auth);
         }
-    });
-
-    if (logoutBtn) {
-        logoutBtn.onclick = () => signOut(auth);
-    }
-</script>
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-    // Firebase config
-    const firebaseConfig = {
-        apiKey: "AIzaSyAA3Q_Mga_bP2Ef_4EfLTCABZ6XoXsJl68",
-        authDomain: "drychess-ffad8.firebaseapp.com",
-        projectId: "drychess-ffad8",
-        storageBucket: "drychess-ffad8.firebasestorage.app",
-        messagingSenderId: "749342832579",
-        appId: "1:749342832579:web:f3cea2d3b38bc3c48d6f76"
-    };
-
-    // Initialize Firebase globally
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    window.auth = auth; // makes it available to login.html
-
-    // Navbar elements
-    const navUser = document.getElementById("navUser");
-
-    // Optional logout button (add <a id="logoutBtn">LOGOUT</a> in navbar if you want)
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    // Update navbar on login/logout
-    onAuthStateChanged(auth, user => {
-        if (!navUser) return;
-
-        if (user) {
-            navUser.textContent = user.email;
-            navUser.href = "#";
-
-            if (logoutBtn) logoutBtn.style.display = "block";
-        } else {
-            navUser.textContent = "LOGIN";
-            navUser.href = "/drychess/login.html";
-
-            if (logoutBtn) logoutBtn.style.display = "none";
-        }
-    });
-
-    // Logout handler
-    if (logoutBtn) {
-        logoutBtn.onclick = () => signOut(auth);
-    }
-</script>
-
+    </script>
 
 </body>
 </html>
