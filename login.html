@@ -4,70 +4,42 @@ title: Login
 ---
 
 <div class="container" style="max-width: 400px; margin-top: 2rem;">
-    <h2>Passwordless Login</h2>
+    <h2>Login</h2>
 
-    <p>Enter your email and we’ll send you a secure login link.</p>
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button id="loginBtn">Login</button>
+<button id="signupBtn">Create Account</button>
 
-    <input id="email" type="email" placeholder="Email" class="form-control">
-
-    <button id="sendLinkBtn" class="btn btn-primary" style="margin-top:10px;">
-        Send Login Link
-    </button>
-
-    <p id="status" style="margin-top: 1rem; color: #ff8800;"></p>
-</div>
+<p id="status"></p>
 
 <script type="module">
-    import {
-        sendSignInLinkToEmail,
-        isSignInWithEmailLink,
-        signInWithEmailLink
+    import { 
+        signInWithEmailAndPassword, 
+        createUserWithEmailAndPassword 
     } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-    // Firebase Auth instance from default.html
     const auth = window.auth;
 
-    const actionCodeSettings = {
-        url: window.location.origin,
-        handleCodeInApp: true
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const status = document.getElementById("status");
+
+    document.getElementById("loginBtn").onclick = async () => {
+        try {
+            await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+            status.textContent = "Logged in!";
+        } catch (err) {
+            status.textContent = err.message;
+        }
     };
 
-    // Send login link
-    document.getElementById("sendLinkBtn").onclick = () => {
-        const email = document.getElementById("email").value;
-        const status = document.getElementById("status");
-
-        if (!email) {
-            status.textContent = "Please enter an email.";
-            return;
+    document.getElementById("signupBtn").onclick = async () => {
+        try {
+            await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+            status.textContent = "Account created!";
+        } catch (err) {
+            status.textContent = err.message;
         }
-
-        sendSignInLinkToEmail(auth, email, actionCodeSettings)
-            .then(() => {
-                status.textContent = "Login link sent! Check your email.";
-                window.localStorage.setItem('emailForSignIn', email);
-            })
-            .catch(error => {
-                status.textContent = error.message;
-            });
     };
-
-    // Handle clicking the email link
-    if (isSignInWithEmailLink(auth, window.location.href)) {
-        let email = window.localStorage.getItem('emailForSignIn');
-
-        if (!email) {
-            email = window.prompt('Please confirm your email for login');
-        }
-
-        signInWithEmailLink(auth, email, window.location.href)
-            .then(() => {
-                window.localStorage.removeItem('emailForSignIn');
-                alert("Logged in!");
-                window.location.href = "/";
-            })
-            .catch(error => {
-                document.getElementById("status").textContent = error.message;
-            });
-    }
 </script>
