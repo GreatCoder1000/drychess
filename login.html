@@ -42,20 +42,44 @@ title: Login
 </div>
 
 <script type="module">
-    import { signInWithEmailAndPassword, createUserWithEmailAndPassword }
-        from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-
     // Wait for Firebase to be initialized
+    let signInWithEmailAndPassword, createUserWithEmailAndPassword, doc, setDoc;
     let auth, db;
 
     async function waitForFirebase() {
-        while (!window.auth || !window.db) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait for window.auth and window.db
+        let attempts = 0;
+        while ((!window.auth || !window.db) && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
         }
-        auth = window.auth;
-        db = window.db;
-        initializeLoginForm();
+
+        if (!window.auth || !window.db) {
+            console.error("Firebase failed to initialize");
+            document.getElementById("loginStatus").textContent = "Error: Firebase not initialized";
+            document.getElementById("registerStatus").textContent = "Error: Firebase not initialized";
+            return;
+        }
+
+        // Now dynamically import Firebase functions
+        try {
+            const authModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js");
+            const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+            
+            signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
+            createUserWithEmailAndPassword = authModule.createUserWithEmailAndPassword;
+            doc = firestoreModule.doc;
+            setDoc = firestoreModule.setDoc;
+
+            auth = window.auth;
+            db = window.db;
+
+            initializeLoginForm();
+        } catch (error) {
+            console.error("Error loading Firebase modules:", error);
+            document.getElementById("loginStatus").textContent = "Error: Could not load Firebase";
+            document.getElementById("registerStatus").textContent = "Error: Could not load Firebase";
+        }
     }
 
     function initializeLoginForm() {
@@ -95,32 +119,38 @@ title: Login
         // Login handler
         loginBtn.onclick = async () => {
             loginStatus.textContent = "";
+            loginBtn.disabled = true;
 
             try {
                 await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
                 window.location.href = "/drychess/index.html";
             } catch (err) {
                 loginStatus.textContent = err.message;
+                loginBtn.disabled = false;
             }
         };
 
         // Register handler
         registerBtn.onclick = async () => {
             registerStatus.textContent = "";
+            registerBtn.disabled = true;
 
             // Validate
             if (!regEmail.value || !regPassword.value) {
                 registerStatus.textContent = "Email and password required";
+                registerBtn.disabled = false;
                 return;
             }
 
             if (regPassword.value !== regPassword2.value) {
                 registerStatus.textContent = "Passwords do not match";
+                registerBtn.disabled = false;
                 return;
             }
 
             if (regPassword.value.length < 6) {
                 registerStatus.textContent = "Password must be at least 6 characters";
+                registerBtn.disabled = false;
                 return;
             }
 
@@ -130,16 +160,18 @@ title: Login
                 // Save nickname to Firestore
                 await setDoc(doc(db, "users", cred.user.uid), {
                     nickname: nickInput.value || regEmail.value,
-                    rating: 1200
+                    rating: 1200,
+                    games: 0
                 });
 
                 window.location.href = "/drychess/index.html";
             } catch (err) {
                 registerStatus.textContent = err.message;
+                registerBtn.disabled = false;
             }
         };
     }
 
-    // Initialize when Firebase is ready
+    // Start initialization
     waitForFirebase();
 </script>

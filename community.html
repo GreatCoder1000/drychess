@@ -29,17 +29,36 @@ title: Community
 </div>
 
 <script type="module">
-    import { getDocs, collection, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-
     let db;
+    let getDocs, collection, query, orderBy, limit;
 
     // Wait for Firebase to be initialized
     async function waitForFirebase() {
-        while (!window.db) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+        let attempts = 0;
+        while (!window.db && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
         }
-        db = window.db;
-        loadLeaderboard();
+
+        if (!window.db) {
+            console.error("Firebase failed to initialize");
+            return;
+        }
+
+        try {
+            const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+            
+            getDocs = firestoreModule.getDocs;
+            collection = firestoreModule.collection;
+            query = firestoreModule.query;
+            orderBy = firestoreModule.orderBy;
+            limit = firestoreModule.limit;
+            db = window.db;
+
+            loadLeaderboard();
+        } catch (error) {
+            console.error("Error loading Firebase modules:", error);
+        }
     }
 
     async function loadLeaderboard() {

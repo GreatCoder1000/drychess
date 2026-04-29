@@ -45,22 +45,58 @@ title: Play vs Computer
 </div>
 
 <script type="module">
-    import { getDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-    import { getAllBots } from "./bots.js";
-
     let db, auth;
-    const botDatabase = getAllBots();
+    let getDoc, doc;
+    const botDatabase = [{
+        id: "bot-rookie",
+        name: "Rookiebomb",
+        level: 1,
+        rating: 400,
+        description: "Perfect for beginners"
+    },
+    {
+        id: "bot-pawn",
+        name: "Pawn Pusher",
+        level: 2,
+        rating: 600,
+        description: "A simple opponent"
+    },
+    {
+        id: "bot-knight",
+        name: "Knight Rider",
+        level: 3,
+        rating: 800,
+        description: "Challenging play"
+    }];
+    
     let userRating = 1200;
     let selectedBot = null;
 
     // Wait for Firebase to be initialized
     async function waitForFirebase() {
-        while (!window.auth || !window.db) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+        let attempts = 0;
+        while ((!window.auth || !window.db) && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
         }
-        db = window.db;
-        auth = window.auth;
-        initializeApp();
+
+        if (!window.auth || !window.db) {
+            console.error("Firebase failed to initialize");
+            return;
+        }
+
+        try {
+            const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+            
+            getDoc = firestoreModule.getDoc;
+            doc = firestoreModule.doc;
+            db = window.db;
+            auth = window.auth;
+
+            initializeApp();
+        } catch (error) {
+            console.error("Error loading Firebase modules:", error);
+        }
     }
 
     // Load user rating
@@ -100,7 +136,7 @@ title: Play vs Computer
         });
     }
 
-    // Select a bot and check URL parameters
+    // Select a bot
     window.selectBot = function (botId) {
         selectedBot = botDatabase.find(b => b.id === botId);
         if (selectedBot) {
@@ -147,9 +183,6 @@ title: Play vs Computer
         displayBots();
         checkUrlParameters();
     }
-
-    // Expose for onclick handlers
-    window.displayBots = displayBots;
 
     // Start initialization
     waitForFirebase();
