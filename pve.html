@@ -22,8 +22,11 @@ title: Play vs Computer
                     <p>Your Rating: <span id="userRating" class="badge badge-info"></span></p>
                     <div id="chessboard" style="margin-top: 1rem;">
                         <!-- Chessboard placeholder -->
-                        <div style="background: #ddd; width: 100%; max-width: 400px; padding-bottom: 100%; position: relative;">
-                            <p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #999;">Chessboard coming soon</p>
+                        <div
+                            style="background: #ddd; width: 100%; max-width: 400px; padding-bottom: 100%; position: relative;">
+                            <p
+                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #999;">
+                                Chessboard coming soon</p>
                         </div>
                     </div>
                 </div>
@@ -44,7 +47,7 @@ title: Play vs Computer
 <script type="module">
     import { getDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
     import { getAllBots } from "./bots.js";
-    
+
     const db = window.db;
     const auth = window.auth;
 
@@ -90,7 +93,7 @@ title: Play vs Computer
     }
 
     // Select a bot and check URL parameters
-    window.selectBot = function(botId) {
+    window.selectBot = function (botId) {
         selectedBot = botDatabase.find(b => b.id === botId);
         if (selectedBot) {
             showGameScreen();
@@ -101,7 +104,7 @@ title: Play vs Computer
     function showGameScreen() {
         document.getElementById("botSelectionScreen").style.display = "none";
         document.getElementById("gameScreen").style.display = "block";
-        
+
         document.getElementById("currentBotName").textContent = selectedBot.name;
         document.getElementById("currentBotRating").textContent = selectedBot.rating;
         document.getElementById("gameBotName").textContent = selectedBot.name;
@@ -110,7 +113,7 @@ title: Play vs Computer
     }
 
     // Back to bot selection
-    window.backToSelection = function() {
+    window.backToSelection = function () {
         selectedBot = null;
         document.getElementById("botSelectionScreen").style.display = "block";
         document.getElementById("gameScreen").style.display = "none";
@@ -120,7 +123,7 @@ title: Play vs Computer
     function checkUrlParameters() {
         const params = new URLSearchParams(window.location.search);
         const botParam = params.get("bot");
-        
+
         if (botParam) {
             const bot = botDatabase.find(b => b.id === botParam);
             if (bot) {

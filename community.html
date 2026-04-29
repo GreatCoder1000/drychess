@@ -40,7 +40,7 @@ title: Community
                 orderBy("rating", "desc"),
                 limit(20)
             );
-            
+
             const snapshot = await getDocs(q);
             const tbody = document.getElementById("leaderboardBody");
             tbody.innerHTML = "";
@@ -64,7 +64,7 @@ title: Community
             }
         } catch (err) {
             console.error("Error loading leaderboard:", err);
-            document.getElementById("leaderboardBody").innerHTML = 
+            document.getElementById("leaderboardBody").innerHTML =
                 '<tr><td colspan="4" class="text-center text-danger">Error loading players</td></tr>';
         }
     }
