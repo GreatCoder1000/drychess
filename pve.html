@@ -68,7 +68,7 @@ title: Play vs Computer
         rating: 800,
         description: "Challenging play"
     }];
-    
+
     let userRating = 1200;
     let selectedBot = null;
 
@@ -87,7 +87,7 @@ title: Play vs Computer
 
         try {
             const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
-            
+
             getDoc = firestoreModule.getDoc;
             doc = firestoreModule.doc;
             db = window.db;
