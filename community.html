@@ -31,7 +31,16 @@ title: Community
 <script type="module">
     import { getDocs, collection, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-    const db = window.db;
+    let db;
+
+    // Wait for Firebase to be initialized
+    async function waitForFirebase() {
+        while (!window.db) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        db = window.db;
+        loadLeaderboard();
+    }
 
     async function loadLeaderboard() {
         try {
@@ -69,5 +78,5 @@ title: Community
         }
     }
 
-    loadLeaderboard();
+    waitForFirebase();
 </script>

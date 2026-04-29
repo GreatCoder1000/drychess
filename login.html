@@ -46,86 +46,100 @@ title: Login
         from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
     import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-    const auth = window.auth;
-    const db = window.db;
-
-    // Elements
-    const loginForm = document.getElementById("loginForm");
-    const registerForm = document.getElementById("registerForm");
-    const toggleRegisterBtn = document.getElementById("toggleRegister");
-    const toggleLoginBtn = document.getElementById("toggleLogin");
-
-    // LOGIN
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const loginStatus = document.getElementById("loginStatus");
-    const loginBtn = document.getElementById("loginBtn");
-
-    // REGISTER
-    const nickInput = document.getElementById("nickInput");
-    const regEmail = document.getElementById("regEmail");
-    const regPassword = document.getElementById("regPassword");
-    const regPassword2 = document.getElementById("regPassword2");
-    const registerStatus = document.getElementById("registerStatus");
-    const registerBtn = document.getElementById("registerBtn");
-
-    // Toggle between login and register
-    toggleRegisterBtn.onclick = (e) => {
-        e.preventDefault();
-        loginForm.style.display = "none";
-        registerForm.style.display = "block";
-    };
-
-    toggleLoginBtn.onclick = (e) => {
-        e.preventDefault();
-        registerForm.style.display = "none";
-        loginForm.style.display = "block";
-    };
-
-    // Login handler
-    loginBtn.onclick = async () => {
-        loginStatus.textContent = "";
-
-        try {
-            await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-            window.location.href = "/drychess/index.html";
-        } catch (err) {
-            loginStatus.textContent = err.message;
+    // Wait for Firebase to be initialized
+    let auth, db;
+    
+    async function waitForFirebase() {
+        while (!window.auth || !window.db) {
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
-    };
+        auth = window.auth;
+        db = window.db;
+        initializeLoginForm();
+    }
+    
+    function initializeLoginForm() {
+        // Elements
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+        const toggleRegisterBtn = document.getElementById("toggleRegister");
+        const toggleLoginBtn = document.getElementById("toggleLogin");
 
-    // Register handler
-    registerBtn.onclick = async () => {
-        registerStatus.textContent = "";
+        // LOGIN
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const loginStatus = document.getElementById("loginStatus");
+        const loginBtn = document.getElementById("loginBtn");
 
-        // Validate
-        if (!regEmail.value || !regPassword.value) {
-            registerStatus.textContent = "Email and password required";
-            return;
-        }
+        // REGISTER
+        const nickInput = document.getElementById("nickInput");
+        const regEmail = document.getElementById("regEmail");
+        const regPassword = document.getElementById("regPassword");
+        const regPassword2 = document.getElementById("regPassword2");
+        const registerStatus = document.getElementById("registerStatus");
+        const registerBtn = document.getElementById("registerBtn");
 
-        if (regPassword.value !== regPassword2.value) {
-            registerStatus.textContent = "Passwords do not match";
-            return;
-        }
+        // Toggle between login and register
+        toggleRegisterBtn.onclick = (e) => {
+            e.preventDefault();
+            loginForm.style.display = "none";
+            registerForm.style.display = "block";
+        };
 
-        if (regPassword.value.length < 6) {
-            registerStatus.textContent = "Password must be at least 6 characters";
-            return;
-        }
+        toggleLoginBtn.onclick = (e) => {
+            e.preventDefault();
+            registerForm.style.display = "none";
+            loginForm.style.display = "block";
+        };
 
-        try {
-            const cred = await createUserWithEmailAndPassword(auth, regEmail.value, regPassword.value);
+        // Login handler
+        loginBtn.onclick = async () => {
+            loginStatus.textContent = "";
 
-            // Save nickname to Firestore
-            await setDoc(doc(db, "users", cred.user.uid), {
-                nickname: nickInput.value || regEmail.value,
-                rating: 1200
-            });
+            try {
+                await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+                window.location.href = "/drychess/index.html";
+            } catch (err) {
+                loginStatus.textContent = err.message;
+            }
+        };
 
-            window.location.href = "/drychess/index.html";
-        } catch (err) {
-            registerStatus.textContent = err.message;
-        }
-    };
+        // Register handler
+        registerBtn.onclick = async () => {
+            registerStatus.textContent = "";
+
+            // Validate
+            if (!regEmail.value || !regPassword.value) {
+                registerStatus.textContent = "Email and password required";
+                return;
+            }
+
+            if (regPassword.value !== regPassword2.value) {
+                registerStatus.textContent = "Passwords do not match";
+                return;
+            }
+
+            if (regPassword.value.length < 6) {
+                registerStatus.textContent = "Password must be at least 6 characters";
+                return;
+            }
+
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, regEmail.value, regPassword.value);
+
+                // Save nickname to Firestore
+                await setDoc(doc(db, "users", cred.user.uid), {
+                    nickname: nickInput.value || regEmail.value,
+                    rating: 1200
+                });
+
+                window.location.href = "/drychess/index.html";
+            } catch (err) {
+                registerStatus.textContent = err.message;
+            }
+        };
+    }
+
+    // Initialize when Firebase is ready
+    waitForFirebase();
 </script>

@@ -48,12 +48,20 @@ title: Play vs Computer
     import { getDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
     import { getAllBots } from "./bots.js";
 
-    const db = window.db;
-    const auth = window.auth;
-
+    let db, auth;
     const botDatabase = getAllBots();
     let userRating = 1200;
     let selectedBot = null;
+
+    // Wait for Firebase to be initialized
+    async function waitForFirebase() {
+        while (!window.auth || !window.db) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        db = window.db;
+        auth = window.auth;
+        initializeApp();
+    }
 
     // Load user rating
     async function loadUserRating() {
@@ -133,11 +141,16 @@ title: Play vs Computer
         }
     }
 
-    // Initialize
-    await loadUserRating();
-    displayBots();
-    checkUrlParameters();
+    // Initialize app
+    async function initializeApp() {
+        await loadUserRating();
+        displayBots();
+        checkUrlParameters();
+    }
 
     // Expose for onclick handlers
     window.displayBots = displayBots;
+
+    // Start initialization
+    waitForFirebase();
 </script>
