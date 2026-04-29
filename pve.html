@@ -1,0 +1,140 @@
+---
+layout: default
+title: Play vs Computer
+---
+
+<div class="container" style="max-width: 900px;">
+    <h1>Player vs Computer</h1>
+
+    <!-- Bot Selection -->
+    <div id="botSelectionScreen" style="display: block;">
+        <h3>Choose Your Opponent</h3>
+        <div id="botList" class="row"></div>
+    </div>
+
+    <!-- Game Board -->
+    <div id="gameScreen" style="display: none;">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <h3>Game vs <span id="currentBotName"></span></h3>
+                    <p>Bot Rating: <span id="currentBotRating" class="badge badge-info"></span></p>
+                    <p>Your Rating: <span id="userRating" class="badge badge-info"></span></p>
+                    <div id="chessboard" style="margin-top: 1rem;">
+                        <!-- Chessboard placeholder -->
+                        <div style="background: #ddd; width: 100%; max-width: 400px; padding-bottom: 100%; position: relative;">
+                            <p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #999;">Chessboard coming soon</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <h3>Game Info</h3>
+                    <p><strong>Opponent:</strong> <span id="gameBotName"></span></p>
+                    <p><strong>Bot Level:</strong> <span id="gameBotLevel"></span></p>
+                    <p><strong>Bot Rating:</strong> <span id="gameBotRating"></span></p>
+                    <button class="btn btn-danger w-100" onclick="backToSelection()">Cancel Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { getDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    import { getAllBots } from "./bots.js";
+    
+    const db = window.db;
+    const auth = window.auth;
+
+    const botDatabase = getAllBots();
+    let userRating = 1200;
+    let selectedBot = null;
+
+    // Load user rating
+    async function loadUserRating() {
+        try {
+            const user = auth.currentUser;
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists() && userDoc.data().rating) {
+                    userRating = userDoc.data().rating;
+                    document.getElementById("userRating").textContent = userRating;
+                }
+            }
+        } catch (err) {
+            console.log("Could not load user rating:", err);
+        }
+    }
+
+    // Display bots
+    function displayBots() {
+        const botList = document.getElementById("botList");
+        botList.innerHTML = "";
+
+        botDatabase.forEach(bot => {
+            const card = document.createElement("div");
+            card.className = "col-md-6 mb-3";
+            card.innerHTML = `
+                <div class="card" style="cursor: pointer; transition: 0.3s;" onclick="selectBot('${bot.id}')">
+                    <h4>${bot.name}</h4>
+                    <p>${bot.description}</p>
+                    <p><strong>Level:</strong> ${bot.level}</p>
+                    <p><strong>Rating:</strong> <span class="badge badge-info">${bot.rating}</span></p>
+                    <button class="btn btn-primary w-100">Challenge</button>
+                </div>
+            `;
+            botList.appendChild(card);
+        });
+    }
+
+    // Select a bot and check URL parameters
+    window.selectBot = function(botId) {
+        selectedBot = botDatabase.find(b => b.id === botId);
+        if (selectedBot) {
+            showGameScreen();
+        }
+    };
+
+    // Show game screen
+    function showGameScreen() {
+        document.getElementById("botSelectionScreen").style.display = "none";
+        document.getElementById("gameScreen").style.display = "block";
+        
+        document.getElementById("currentBotName").textContent = selectedBot.name;
+        document.getElementById("currentBotRating").textContent = selectedBot.rating;
+        document.getElementById("gameBotName").textContent = selectedBot.name;
+        document.getElementById("gameBotLevel").textContent = selectedBot.level;
+        document.getElementById("gameBotRating").textContent = selectedBot.rating;
+    }
+
+    // Back to bot selection
+    window.backToSelection = function() {
+        selectedBot = null;
+        document.getElementById("botSelectionScreen").style.display = "block";
+        document.getElementById("gameScreen").style.display = "none";
+    };
+
+    // Check URL parameters for bot selection
+    function checkUrlParameters() {
+        const params = new URLSearchParams(window.location.search);
+        const botParam = params.get("bot");
+        
+        if (botParam) {
+            const bot = botDatabase.find(b => b.id === botParam);
+            if (bot) {
+                selectedBot = bot;
+                showGameScreen();
+            }
+        }
+    }
+
+    // Initialize
+    await loadUserRating();
+    displayBots();
+    checkUrlParameters();
+
+    // Expose for onclick handlers
+    window.displayBots = displayBots;
+</script>

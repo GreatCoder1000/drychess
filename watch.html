@@ -4,14 +4,34 @@ title: Watch
 ---
 
 <div class="container">
+    <h1>DryChess TV</h1>
+
     <div class="card">
-        <h1>DryChess TV</h1>
-        <p>
-            Still in development. In the meantime, see the creator&apos;s streaming pages on Twitch:
-            <ul>
-                <li><a href="https://twitch.tv/skillupchess"><strong><em>SkillUpChess</em></strong></a></li>
-                <li><a href="https://twitch.tv/drymajorgem"><strong><em>DryMajorGem</em></strong></a></li>
-            </ul>
-        </p>
+        <h3>Featured Streams</h3>
+        <p>Watch chess matches and learn from top players.</p>
+        <p>Coming soon! In the meantime, check out the creator's streams:</p>
+        <ul>
+            <li><a href="https://twitch.tv/skillupchess" target="_blank">SkillUpChess on Twitch</a></li>
+            <li><a href="https://twitch.tv/drymajorgem" target="_blank">DryMajorGem on Twitch</a></li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Recent Games</h3>
+        <p id="recentGamesText">Loading recent games...</p>
+        <ul id="recentGamesList"></ul>
     </div>
 </div>
+
+<script type="module">
+    const recentGamesList = document.getElementById("recentGamesList");
+    const recentGamesText = document.getElementById("recentGamesText");
+
+    // Placeholder for recent games
+    function displayRecentGames() {
+        recentGamesText.textContent = "No recent games recorded yet.";
+        recentGamesList.innerHTML = "";
+    }
+
+    displayRecentGames();
+</script>

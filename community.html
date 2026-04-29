@@ -4,14 +4,70 @@ title: Community
 ---
 
 <div class="container">
+    <h1>Community</h1>
+
     <div class="card">
-        <h1>Players</h1>
-        <ul>
-            <li>devisthebest</li>
-            <li>drymajorgem</li>
-        </ul>
-        <p>
-            You can also join once we add the login feature! 🎃🎃🎃
-        </p>
+        <h3>Players Leaderboard</h3>
+        <div id="leaderboardContainer">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Rating</th>
+                        <th>Games</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <tr>
+                        <td colspan="4" class="text-center">Loading players...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<script type="module">
+    import { getDocs, collection, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+    const db = window.db;
+
+    async function loadLeaderboard() {
+        try {
+            const q = query(
+                collection(db, "users"),
+                orderBy("rating", "desc"),
+                limit(20)
+            );
+            
+            const snapshot = await getDocs(q);
+            const tbody = document.getElementById("leaderboardBody");
+            tbody.innerHTML = "";
+
+            let rank = 1;
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${rank}</td>
+                    <td>${data.nickname || "Unknown"}</td>
+                    <td><strong>${data.rating || 1200}</strong></td>
+                    <td>${data.games || 0}</td>
+                `;
+                tbody.appendChild(row);
+                rank++;
+            });
+
+            if (snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No players yet</td></tr>';
+            }
+        } catch (err) {
+            console.error("Error loading leaderboard:", err);
+            document.getElementById("leaderboardBody").innerHTML = 
+                '<tr><td colspan="4" class="text-center text-danger">Error loading players</td></tr>';
+        }
+    }
+
+    loadLeaderboard();
+</script>
