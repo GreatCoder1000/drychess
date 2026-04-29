@@ -48,7 +48,7 @@ title: Login
 
     // Wait for Firebase to be initialized
     let auth, db;
-    
+
     async function waitForFirebase() {
         while (!window.auth || !window.db) {
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -57,7 +57,7 @@ title: Login
         db = window.db;
         initializeLoginForm();
     }
-    
+
     function initializeLoginForm() {
         // Elements
         const loginForm = document.getElementById("loginForm");
