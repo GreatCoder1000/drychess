@@ -1,0 +1,127 @@
+---
+layout: default
+title: Player Profile
+---
+
+<div class="container" style="max-width: 600px;">
+    <div id="profileContainer" style="display: none;">
+        <div class="card">
+            <h1 id="playerName"></h1>
+            
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <p><strong>Rating:</strong> <span id="playerRating" class="badge badge-info"></span></p>
+                    <p><strong>Games Played:</strong> <span id="playerGames"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Member ID:</strong> <code id="playerId" style="font-size: 0.8em;"></code></p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h3>Bio</h3>
+            <p id="playerBio" style="font-style: italic; color: #666;"></p>
+
+            <hr>
+
+            <button class="btn btn-primary" onclick="window.location.href='/drychess/community.html'">Back to Leaderboard</button>
+        </div>
+    </div>
+
+    <div id="errorContainer" style="display: none;">
+        <div class="card">
+            <p class="text-danger"><strong>Error:</strong> <span id="errorMessage"></span></p>
+            <button class="btn btn-primary" onclick="window.location.href='/drychess/community.html'">Back to Leaderboard</button>
+        </div>
+    </div>
+
+    <div id="loadingContainer">
+        <div class="card">
+            <p>Loading profile...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    let db, getDoc, doc;
+
+    // Wait for Firebase to be initialized
+    async function waitForFirebase() {
+        let attempts = 0;
+        while (!window.db && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+        }
+
+        if (!window.db) {
+            console.error("Firebase failed to initialize");
+            showError("Firebase not initialized");
+            return;
+        }
+
+        try {
+            const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+            
+            getDoc = firestoreModule.getDoc;
+            doc = firestoreModule.doc;
+            db = window.db;
+
+            loadProfile();
+        } catch (error) {
+            console.error("Error loading Firebase modules:", error);
+            showError("Could not load Firebase");
+        }
+    }
+
+    function showError(message) {
+        document.getElementById("loadingContainer").style.display = "none";
+        document.getElementById("profileContainer").style.display = "none";
+        document.getElementById("errorContainer").style.display = "block";
+        document.getElementById("errorMessage").textContent = message;
+    }
+
+    async function loadProfile() {
+        try {
+            // Get uid from URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const uid = params.get("uid");
+
+            if (!uid) {
+                showError("No user ID provided. Use ?uid=USER_ID");
+                return;
+            }
+
+            console.log("Loading profile for UID:", uid);
+
+            // Fetch user document
+            const userDoc = await getDoc(doc(db, "users", uid));
+
+            if (!userDoc.exists()) {
+                showError("Player not found");
+                return;
+            }
+
+            const data = userDoc.data();
+            console.log("User data:", data);
+
+            // Display profile
+            document.getElementById("loadingContainer").style.display = "none";
+            document.getElementById("errorContainer").style.display = "none";
+            document.getElementById("profileContainer").style.display = "block";
+
+            document.getElementById("playerName").textContent = data.nickname || "Unknown Player";
+            document.getElementById("playerRating").textContent = data.rating || 1200;
+            document.getElementById("playerGames").textContent = data.games || 0;
+            document.getElementById("playerId").textContent = uid;
+            document.getElementById("playerBio").textContent = data.bio || "No bio added yet.";
+
+        } catch (err) {
+            console.error("Error loading profile:", err);
+            showError(err.message);
+        }
+    }
+
+    // Start initialization
+    waitForFirebase();
+</script>

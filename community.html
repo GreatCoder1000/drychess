@@ -87,6 +87,7 @@ title: Community
                 const data = doc.data();
                 console.log("User doc:", doc.id, data);
                 players.push({
+                    uid: doc.id,
                     nickname: data.nickname || "Unknown",
                     rating: data.rating || 1200,
                     games: data.games || 0
@@ -103,7 +104,7 @@ title: Community
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${rank}</td>
-                    <td>${player.nickname}</td>
+                    <td><a href="/drychess/profile.html?uid=${player.uid}" style="color: var(--pumpkin); text-decoration: none;">${player.nickname}</a></td>
                     <td><strong>${player.rating}</strong></td>
                     <td>${player.games}</td>
                 `;
