@@ -7,7 +7,7 @@ title: Player Profile
     <div id="profileContainer" style="display: none;">
         <div class="card">
             <h1 id="playerName"></h1>
-            
+
             <div class="row mt-3">
                 <div class="col-md-6">
                     <p><strong>Rating:</strong> <span id="playerRating" class="badge badge-info"></span></p>
@@ -25,14 +25,16 @@ title: Player Profile
 
             <hr>
 
-            <button class="btn btn-primary" onclick="window.location.href='/drychess/community.html'">Back to Leaderboard</button>
+            <button class="btn btn-primary" onclick="window.location.href='/drychess/community.html'">Back to
+                Leaderboard</button>
         </div>
     </div>
 
     <div id="errorContainer" style="display: none;">
         <div class="card">
             <p class="text-danger"><strong>Error:</strong> <span id="errorMessage"></span></p>
-            <button class="btn btn-primary" onclick="window.location.href='/drychess/community.html'">Back to Leaderboard</button>
+            <button class="btn btn-primary" onclick="window.location.href='/drychess/community.html'">Back to
+                Leaderboard</button>
         </div>
     </div>
 
@@ -62,7 +64,7 @@ title: Player Profile
 
         try {
             const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
-            
+
             getDoc = firestoreModule.getDoc;
             doc = firestoreModule.doc;
             db = window.db;
