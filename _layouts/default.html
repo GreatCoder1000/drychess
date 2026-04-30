@@ -65,7 +65,7 @@
             <div id="chatInputContainer" style="display: none;">
                 <div style="display: flex; gap: 0.5rem;">
                     <input id="chatInput" type="text" class="form-control"
-                        placeholder="Say something (max 20 messages per 2 hours)..." maxlength="20">
+                        placeholder="Say something (max 100 messages per 24 hours)..." maxlength="20">
                     <button id="chatSendBtn" class="btn btn-primary" onclick="sendChatMessage()">Send</button>
                 </div>
                 <small id="chatStatus"></small>
@@ -258,8 +258,8 @@
                 chatStatus.textContent = "Checking rate limit...";
                 chatSendBtn.disabled = true;
 
-                // Check rate limit (20 messages per 2 hours)
-                const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+                // Check rate limit (100 messages per 24 hours)
+                const twoHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
                 const recentMessagesQuery = query(
                     collection(chatDb, "globalChat"),
                     where("userId", "==", user.uid),
@@ -268,8 +268,8 @@
 
                 const recentSnapshot = await getDocs(recentMessagesQuery);
 
-                if (recentSnapshot.size >= 20) {
-                    chatStatus.textContent = "Rate limit reached! (20 messages per 2 hours)";
+                if (recentSnapshot.size >= 100) {
+                    chatStatus.textContent = "Rate limit reached! (100 messages per 24 hours)";
                     chatSendBtn.disabled = false;
                     return;
                 }
