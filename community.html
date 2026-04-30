@@ -67,10 +67,10 @@ title: Community
         try {
             console.log("Fetching users from Firestore...");
             const tbody = document.getElementById("leaderboardBody");
-            
+
             // Fetch all users (without orderBy to avoid index issues)
             const snapshot = await getDocs(collection(db, "users"));
-            
+
             console.log("Query result - empty:", snapshot.empty, "docs count:", snapshot.size);
 
             tbody.innerHTML = "";
@@ -120,7 +120,7 @@ title: Community
     }
 
     // Expose refresh function
-    window.refreshLeaderboard = function() {
+    window.refreshLeaderboard = function () {
         console.log("Manual refresh triggered");
         loadLeaderboard();
     };
