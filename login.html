@@ -155,17 +155,24 @@ title: Login
             }
 
             try {
+                console.log("Creating user with email:", regEmail.value);
                 const cred = await createUserWithEmailAndPassword(auth, regEmail.value, regPassword.value);
+                console.log("User created with UID:", cred.user.uid);
 
                 // Save nickname to Firestore
+                console.log("Saving user profile to Firestore...");
                 await setDoc(doc(db, "users", cred.user.uid), {
                     nickname: nickInput.value || regEmail.value,
                     rating: 1200,
                     games: 0
                 });
+                console.log("User profile saved successfully!");
 
                 window.location.href = "/drychess/index.html";
             } catch (err) {
+                console.error("Registration error:", err);
+                console.error("Error code:", err.code);
+                console.error("Error message:", err.message);
                 registerStatus.textContent = err.message;
                 registerBtn.disabled = false;
             }
