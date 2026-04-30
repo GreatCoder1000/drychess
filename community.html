@@ -30,7 +30,7 @@ title: Community
 
 <script type="module">
     let db;
-    let getDocs, collection, query, orderBy, limit;
+    let getDocs, collection;
 
     // Wait for Firebase to be initialized
     async function waitForFirebase() {
@@ -50,9 +50,6 @@ title: Community
 
             getDocs = firestoreModule.getDocs;
             collection = firestoreModule.collection;
-            query = firestoreModule.query;
-            orderBy = firestoreModule.orderBy;
-            limit = firestoreModule.limit;
             db = window.db;
 
             loadLeaderboard();
@@ -63,33 +60,42 @@ title: Community
 
     async function loadLeaderboard() {
         try {
-            const q = query(
-                collection(db, "users"),
-                orderBy("rating", "desc"),
-                limit(20)
-            );
-
-            const snapshot = await getDocs(q);
+            // Fetch all users (without orderBy to avoid index issues)
+            const snapshot = await getDocs(collection(db, "users"));
             const tbody = document.getElementById("leaderboardBody");
             tbody.innerHTML = "";
 
-            let rank = 1;
+            if (snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No players yet</td></tr>';
+                return;
+            }
+
+            // Convert to array and sort by rating
+            const players = [];
             snapshot.forEach(doc => {
-                const data = doc.data();
+                players.push({
+                    nickname: doc.data().nickname || "Unknown",
+                    rating: doc.data().rating || 1200,
+                    games: doc.data().games || 0
+                });
+            });
+
+            // Sort by rating descending
+            players.sort((a, b) => b.rating - a.rating);
+
+            // Display top 20
+            let rank = 1;
+            players.slice(0, 20).forEach(player => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${rank}</td>
-                    <td>${data.nickname || "Unknown"}</td>
-                    <td><strong>${data.rating || 1200}</strong></td>
-                    <td>${data.games || 0}</td>
+                    <td>${player.nickname}</td>
+                    <td><strong>${player.rating}</strong></td>
+                    <td>${player.games}</td>
                 `;
                 tbody.appendChild(row);
                 rank++;
             });
-
-            if (snapshot.empty) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No players yet</td></tr>';
-            }
         } catch (err) {
             console.error("Error loading leaderboard:", err);
             document.getElementById("leaderboardBody").innerHTML =
