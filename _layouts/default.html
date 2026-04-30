@@ -49,6 +49,29 @@
         {{ content }}
     </main>
 
+    <!-- GLOBAL CHAT -->
+    <div id="globalChatContainer" style="background: #f9f9f9; padding: 1rem; margin-top: 2rem; border-top: 1px solid #ddd;">
+        <div class="container">
+            <h3 style="color: var(--pumpkin);">Global Chat</h3>
+            
+            <div id="chatMessages" style="max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem;">
+                <p style="text-align: center; color: #999;">Loading messages...</p>
+            </div>
+
+            <div id="chatInputContainer" style="display: none;">
+                <div style="display: flex; gap: 0.5rem;">
+                    <input id="chatInput" type="text" class="form-control" placeholder="Say something (max 20 messages per 2 hours)..." maxlength="20">
+                    <button id="chatSendBtn" class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+                </div>
+                <small id="chatStatus"></small>
+            </div>
+
+            <div id="chatLoginPrompt">
+                <p style="text-align: center; color: #666;"><a href="/drychess/login.html">Login</a> to join the global chat!</p>
+            </div>
+        </div>
+    </div>
+
     <footer>
         &copy; 2025 GreatCoder1000<br>
         Made with GitHub Pages, Jekyll &amp; Firebase.
@@ -122,5 +145,160 @@
         }
     </script>
 
+    <!-- GLOBAL CHAT SCRIPT -->
+    <script type="module">
+        let chatDb, chatAuth;
+        let getDocs, collection, query, orderBy, limit, addDoc, serverTimestamp, where;
+
+        async function initChat() {
+            // Wait for Firebase to be ready
+            let attempts = 0;
+            while ((!window.db || !window.auth) && attempts < 100) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+                attempts++;
+            }
+
+            if (!window.db || !window.auth) return;
+
+            try {
+                const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+                getDocs = firestoreModule.getDocs;
+                collection = firestoreModule.collection;
+                query = firestoreModule.query;
+                orderBy = firestoreModule.orderBy;
+                limit = firestoreModule.limit;
+                addDoc = firestoreModule.addDoc;
+                serverTimestamp = firestoreModule.serverTimestamp;
+                where = firestoreModule.where;
+
+                chatDb = window.db;
+                chatAuth = window.auth;
+
+                // Update chat UI based on auth state
+                chatAuth.onAuthStateChanged(user => {
+                    updateChatUI(user);
+                    if (user) loadChatMessages();
+                });
+            } catch (error) {
+                console.error("Error initializing chat:", error);
+            }
+        }
+
+        function updateChatUI(user) {
+            const inputContainer = document.getElementById("chatInputContainer");
+            const loginPrompt = document.getElementById("chatLoginPrompt");
+
+            if (user) {
+                inputContainer.style.display = "block";
+                loginPrompt.style.display = "none";
+            } else {
+                inputContainer.style.display = "none";
+                loginPrompt.style.display = "block";
+            }
+        }
+
+        async function loadChatMessages() {
+            try {
+                const q = query(
+                    collection(chatDb, "globalChat"),
+                    orderBy("timestamp", "desc"),
+                    limit(50)
+                );
+                const snapshot = await getDocs(q);
+                const messagesDiv = document.getElementById("chatMessages");
+                
+                if (snapshot.empty) {
+                    messagesDiv.innerHTML = "<p style='text-align: center; color: #999;'>No messages yet. Start the conversation!</p>";
+                    return;
+                }
+
+                const messages = [];
+                snapshot.forEach(doc => {
+                    messages.push(doc.data());
+                });
+
+                // Reverse to show oldest first
+                messages.reverse();
+
+                let html = "";
+                messages.forEach(msg => {
+                    const time = new Date(msg.timestamp.toDate()).toLocaleTimeString();
+                    html += `<div style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                        <strong style="color: var(--pumpkin);">${msg.nickname}</strong>
+                        <span style="color: #999; font-size: 0.85em;"> ${time}</span>
+                        <p style="margin: 0.25rem 0 0 0;">${msg.message}</p>
+                    </div>`;
+                });
+
+                messagesDiv.innerHTML = html;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } catch (error) {
+                console.error("Error loading chat messages:", error);
+            }
+        }
+
+        window.sendChatMessage = async function() {
+            const user = chatAuth.currentUser;
+            if (!user) return;
+
+            const chatInput = document.getElementById("chatInput");
+            const message = chatInput.value.trim();
+            const chatStatus = document.getElementById("chatStatus");
+            const chatSendBtn = document.getElementById("chatSendBtn");
+
+            if (!message) return;
+
+            try {
+                chatStatus.textContent = "Checking rate limit...";
+                chatSendBtn.disabled = true;
+
+                // Check rate limit (20 messages per 2 hours)
+                const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+                const recentMessagesQuery = query(
+                    collection(chatDb, "globalChat"),
+                    where("userId", "==", user.uid),
+                    where("timestamp", ">", twoHoursAgo)
+                );
+
+                const recentSnapshot = await getDocs(recentMessagesQuery);
+                
+                if (recentSnapshot.size >= 20) {
+                    chatStatus.textContent = "Rate limit reached! (20 messages per 2 hours)";
+                    chatSendBtn.disabled = false;
+                    return;
+                }
+
+                // Get user nickname
+                const userDoc = await (await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js")).getDoc(
+                    (await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js")).doc(chatDb, "users", user.uid)
+                );
+                const nickname = userDoc.data()?.nickname || user.email;
+
+                // Send message
+                chatStatus.textContent = "Sending...";
+                await addDoc(collection(chatDb, "globalChat"), {
+                    message: message,
+                    nickname: nickname,
+                    userId: user.uid,
+                    timestamp: serverTimestamp()
+                });
+
+                chatInput.value = "";
+                chatStatus.textContent = "";
+                chatSendBtn.disabled = false;
+                
+                // Reload messages
+                loadChatMessages();
+            } catch (error) {
+                console.error("Error sending message:", error);
+                chatStatus.textContent = "Error: " + error.message;
+                chatSendBtn.disabled = false;
+            }
+        };
+
+        initChat();
+    </script>
+
 </body>
+</html>
 </html>
