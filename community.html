@@ -42,6 +42,8 @@ title: Community
 
         if (!window.db) {
             console.error("Firebase failed to initialize");
+            document.getElementById("leaderboardBody").innerHTML =
+                '<tr><td colspan="4" class="text-center text-danger">Firebase not initialized</td></tr>';
             return;
         }
 
@@ -52,20 +54,29 @@ title: Community
             collection = firestoreModule.collection;
             db = window.db;
 
+            console.log("Firebase initialized, loading leaderboard...");
             loadLeaderboard();
         } catch (error) {
             console.error("Error loading Firebase modules:", error);
+            document.getElementById("leaderboardBody").innerHTML =
+                '<tr><td colspan="4" class="text-center text-danger">Error loading Firebase</td></tr>';
         }
     }
 
     async function loadLeaderboard() {
         try {
+            console.log("Fetching users from Firestore...");
+            const tbody = document.getElementById("leaderboardBody");
+            
             // Fetch all users (without orderBy to avoid index issues)
             const snapshot = await getDocs(collection(db, "users"));
-            const tbody = document.getElementById("leaderboardBody");
+            
+            console.log("Query result - empty:", snapshot.empty, "docs count:", snapshot.size);
+
             tbody.innerHTML = "";
 
             if (snapshot.empty) {
+                console.warn("No users found in Firestore");
                 tbody.innerHTML = '<tr><td colspan="4" class="text-center">No players yet</td></tr>';
                 return;
             }
@@ -73,15 +84,18 @@ title: Community
             // Convert to array and sort by rating
             const players = [];
             snapshot.forEach(doc => {
+                const data = doc.data();
+                console.log("User doc:", doc.id, data);
                 players.push({
-                    nickname: doc.data().nickname || "Unknown",
-                    rating: doc.data().rating || 1200,
-                    games: doc.data().games || 0
+                    nickname: data.nickname || "Unknown",
+                    rating: data.rating || 1200,
+                    games: data.games || 0
                 });
             });
 
             // Sort by rating descending
             players.sort((a, b) => b.rating - a.rating);
+            console.log("Sorted players:", players);
 
             // Display top 20
             let rank = 1;
@@ -98,10 +112,18 @@ title: Community
             });
         } catch (err) {
             console.error("Error loading leaderboard:", err);
+            console.error("Error code:", err.code);
+            console.error("Error message:", err.message);
             document.getElementById("leaderboardBody").innerHTML =
-                '<tr><td colspan="4" class="text-center text-danger">Error loading players</td></tr>';
+                '<tr><td colspan="4" class="text-center text-danger">Error: ' + err.message + '</td></tr>';
         }
     }
+
+    // Expose refresh function
+    window.refreshLeaderboard = function() {
+        console.log("Manual refresh triggered");
+        loadLeaderboard();
+    };
 
     waitForFirebase();
 </script>
