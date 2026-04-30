@@ -8,6 +8,10 @@ title: Player Profile
         <div class="card">
             <h1 id="playerName"></h1>
 
+            <div id="badgesContainer" style="margin-top: 1rem;">
+                <!-- Badges will be added here -->
+            </div>
+
             <div class="row mt-3">
                 <div class="col-md-6">
                     <p><strong>Rating:</strong> <span id="playerRating" class="badge badge-info"></span></p>
@@ -113,6 +117,20 @@ title: Player Profile
             document.getElementById("profileContainer").style.display = "block";
 
             document.getElementById("playerName").textContent = data.nickname || "Unknown Player";
+
+            // Display badges
+            const badgesContainer = document.getElementById("badgesContainer");
+            badgesContainer.innerHTML = "";
+
+            if (data.isPlusMember) {
+                const plusBadge = document.createElement("span");
+                plusBadge.className = "badge badge-warning";
+                plusBadge.style.fontSize = "1.2em";
+                plusBadge.style.marginRight = "0.5rem";
+                plusBadge.textContent = "⭐ Plus Member";
+                badgesContainer.appendChild(plusBadge);
+            }
+
             document.getElementById("playerRating").textContent = data.rating || 1200;
             document.getElementById("playerGames").textContent = data.games || 0;
             document.getElementById("playerId").textContent = uid;
