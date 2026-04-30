@@ -22,12 +22,7 @@ title: Play vs Computer
                     <p>Your Rating: <span id="userRating" class="badge badge-info"></span></p>
                     <div id="chessboard" style="margin-top: 1rem;">
                         <!-- Chessboard placeholder -->
-                        <div
-                            style="background: #ddd; width: 100%; max-width: 400px; padding-bottom: 100%; position: relative;">
-                            <p
-                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #999;">
-                                Chessboard coming soon</p>
-                        </div>
+                        <div id="board" style="width: 400px;"></div>
                     </div>
                 </div>
             </div>
@@ -44,7 +39,47 @@ title: Play vs Computer
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard.min.css">
+
 <script type="module">
+    let game = null;
+    let board = null;
+
+    function startGame() {
+        game = new Chess();
+
+        board = Chessboard('board', {
+            draggable: true,
+            position: 'start',
+            onDrop: onPlayerMove
+        });
+    }
+
+    function botMove() {
+        const moves = game.moves();
+        if (moves.length === 0) return;
+
+        const move = moves[Math.floor(Math.random() * moves.length)];
+        game.move(move);
+
+        board.position(game.fen());
+    }
+
+    function onPlayerMove(source, target) {
+        const move = game.move({
+            from: source,
+            to: target,
+            promotion: 'q'
+        });
+
+        if (move === null) return 'snapback';
+
+        setTimeout(botMove, 300);
+    }
+
+
     let db, auth;
     let getDoc, doc;
     const botDatabase = [{
@@ -144,7 +179,6 @@ title: Play vs Computer
         }
     };
 
-    // Show game screen
     function showGameScreen() {
         document.getElementById("botSelectionScreen").style.display = "none";
         document.getElementById("gameScreen").style.display = "block";
@@ -154,7 +188,10 @@ title: Play vs Computer
         document.getElementById("gameBotName").textContent = selectedBot.name;
         document.getElementById("gameBotLevel").textContent = selectedBot.level;
         document.getElementById("gameBotRating").textContent = selectedBot.rating;
+
+        startGame();
     }
+
 
     // Back to bot selection
     window.backToSelection = function () {
