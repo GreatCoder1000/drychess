@@ -27,6 +27,34 @@ title: Player Profile
             <h3>Bio</h3>
             <p id="playerBio" style="font-style: italic; color: #666;"></p>
 
+            <!-- Edit Section (only for own profile) -->
+            <div id="editSection"
+                style="display: none; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd;">
+                <h3>Edit Profile</h3>
+
+                <div class="form-group">
+                    <label><strong>Bio</strong></label>
+                    <textarea id="bioInput" class="form-control" rows="3" placeholder="Enter your bio..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label><strong>Flair</strong></label>
+                    <select id="flairSelect" class="form-control">
+                        <option value="0">None</option>
+                        <option value="1">😀</option>
+                        <option value="2">😇</option>
+                        <option value="3">🎃</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-success" onclick="saveBioAndFlair()">Save Changes</button>
+                <button class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+                <p id="editStatus" class="mt-2 text-danger"></p>
+            </div>
+
+            <button id="editToggleBtn" class="btn btn-secondary mt-3" style="display: none;" onclick="toggleEdit()">Edit
+                Profile</button>
+
             <hr>
 
             <button class="btn btn-primary" onclick="window.location.href='/drychess/community.html'">Back to
@@ -50,17 +78,25 @@ title: Player Profile
 </div>
 
 <script type="module">
-    let db, getDoc, doc;
+    let db, getDoc, doc, updateDoc;
+    let currentUserUid = null;
+    let profileUid = null;
+    const FLAIR_EMOJIS = [
+        "",
+        "😀",
+        "😇",
+        "🎃"
+    ];
 
     // Wait for Firebase to be initialized
     async function waitForFirebase() {
         let attempts = 0;
-        while (!window.db && attempts < 100) {
+        while ((!window.db || !window.auth) && attempts < 100) {
             await new Promise(resolve => setTimeout(resolve, 50));
             attempts++;
         }
 
-        if (!window.db) {
+        if (!window.db || !window.auth) {
             console.error("Firebase failed to initialize");
             showError("Firebase not initialized");
             return;
@@ -71,7 +107,11 @@ title: Player Profile
 
             getDoc = firestoreModule.getDoc;
             doc = firestoreModule.doc;
+            updateDoc = firestoreModule.updateDoc;
             db = window.db;
+
+            // Get current user
+            currentUserUid = window.auth.currentUser?.uid;
 
             loadProfile();
         } catch (error) {
@@ -87,21 +127,61 @@ title: Player Profile
         document.getElementById("errorMessage").textContent = message;
     }
 
+    function toggleEdit() {
+        const editSection = document.getElementById("editSection");
+        editSection.style.display = editSection.style.display === "none" ? "block" : "none";
+    }
+
+    function cancelEdit() {
+        document.getElementById("editSection").style.display = "none";
+    }
+
+    async function saveBioAndFlair() {
+        try {
+            const bioInput = document.getElementById("bioInput").value;
+            const flairSelect = parseInt(document.getElementById("flairSelect").value);
+            const editStatus = document.getElementById("editStatus");
+
+            editStatus.textContent = "Saving...";
+
+            // Update Firestore
+            await updateDoc(doc(db, "users", profileUid), {
+                bio: bioInput,
+                flairId: flairSelect
+            });
+
+            editStatus.textContent = "";
+            cancelEdit();
+
+            // Reload profile to show changes
+            loadProfile();
+        } catch (err) {
+            console.error("Error saving profile:", err);
+            document.getElementById("editStatus").textContent = "Error: " + err.message;
+        }
+    }
+
+    // Expose functions for onclick
+    window.toggleEdit = toggleEdit;
+    window.cancelEdit = cancelEdit;
+    window.saveBioAndFlair = saveBioAndFlair;
+
     async function loadProfile() {
         try {
             // Get uid from URL parameters
             const params = new URLSearchParams(window.location.search);
-            const uid = params.get("uid");
+            profileUid = params.get("uid");
 
-            if (!uid) {
+            if (!profileUid) {
                 showError("No user ID provided. Use ?uid=USER_ID");
                 return;
             }
 
-            console.log("Loading profile for UID:", uid);
+            console.log("Loading profile for UID:", profileUid);
+            console.log("Current user UID:", currentUserUid);
 
             // Fetch user document
-            const userDoc = await getDoc(doc(db, "users", uid));
+            const userDoc = await getDoc(doc(db, "users", profileUid));
 
             if (!userDoc.exists()) {
                 showError("Player not found");
@@ -116,7 +196,8 @@ title: Player Profile
             document.getElementById("errorContainer").style.display = "none";
             document.getElementById("profileContainer").style.display = "block";
 
-            document.getElementById("playerName").textContent = data.nickname || "Unknown Player";
+            const flairEmoji = FLAIR_EMOJIS[data.flairId] || "";
+            document.getElementById("playerName").textContent = (data.nickname || "Unknown Player") + (flairEmoji ? " " + flairEmoji : "");
 
             // Display badges
             const badgesContainer = document.getElementById("badgesContainer");
@@ -133,8 +214,24 @@ title: Player Profile
 
             document.getElementById("playerRating").textContent = data.rating || 1200;
             document.getElementById("playerGames").textContent = data.games || 0;
-            document.getElementById("playerId").textContent = uid;
+            document.getElementById("playerId").textContent = profileUid;
             document.getElementById("playerBio").textContent = data.bio || "No bio added yet.";
+
+            // Show edit button if this is the user's own profile
+            const editToggleBtn = document.getElementById("editToggleBtn");
+            const editSection = document.getElementById("editSection");
+
+            if (currentUserUid === profileUid) {
+                editToggleBtn.style.display = "block";
+                editSection.style.display = "none";
+
+                // Pre-populate edit fields
+                document.getElementById("bioInput").value = data.bio || "";
+                document.getElementById("flairSelect").value = data.flairId || "0";
+            } else {
+                editToggleBtn.style.display = "none";
+                editSection.style.display = "none";
+            }
 
         } catch (err) {
             console.error("Error loading profile:", err);
