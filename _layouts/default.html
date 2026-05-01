@@ -259,16 +259,24 @@
                 chatSendBtn.disabled = true;
 
                 // Check rate limit (100 messages per 24 hours)
-                const twoHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-                const recentMessagesQuery = query(
+                const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                const userMessagesQuery = query(
                     collection(chatDb, "globalChat"),
-                    where("userId", "==", user.uid),
-                    where("timestamp", ">", twoHoursAgo)
+                    where("userId", "==", user.uid)
                 );
 
-                const recentSnapshot = await getDocs(recentMessagesQuery);
+                const userSnapshot = await getDocs(userMessagesQuery);
 
-                if (recentSnapshot.size >= 100) {
+                // Count messages from the last 24 hours (filter in JavaScript)
+                let recentCount = 0;
+                userSnapshot.forEach(doc => {
+                    const msgTime = doc.data().timestamp?.toDate?.() || new Date(0);
+                    if (msgTime > oneDayAgo) {
+                        recentCount++;
+                    }
+                });
+
+                if (recentCount >= 100) {
                     chatStatus.textContent = "Rate limit reached! (100 messages per 24 hours)";
                     chatSendBtn.disabled = false;
                     return;
