@@ -9,10 +9,6 @@ title: Play vs Computer
     <!-- Bot Selection -->
     <div id="botSelectionScreen" style="display: block;">
         <h3>Choose Your Opponent</h3>
-        <p>
-            <i>PvE is still in development.</i><br>
-            <i>It might not always work due to chess library issues.</i>
-        </p>
         <div id="botList" class="row"></div>
     </div>
 
@@ -25,8 +21,8 @@ title: Play vs Computer
                     <p>Bot Rating: <span id="currentBotRating" class="badge badge-info"></span></p>
                     <p>Your Rating: <span id="userRating" class="badge badge-info"></span></p>
 
-                    <div style="margin-top: 1rem;">
-                        <div id="board" style="width: 400px;"></div>
+                    <div style="margin-top: 1rem; background: #8B7355; width: 400px; height: 400px; border: 2px solid #444;">
+                        <div id="board"></div>
                     </div>
 
                 </div>
@@ -38,6 +34,7 @@ title: Play vs Computer
                     <p><strong>Opponent:</strong> <span id="gameBotName"></span></p>
                     <p><strong>Bot Level:</strong> <span id="gameBotLevel"></span></p>
                     <p><strong>Bot Rating:</strong> <span id="gameBotRating"></span></p>
+                    <p id="gameStatus" style="font-style: italic; color: #666;"></p>
                     <button class="btn btn-danger w-100" onclick="backToSelection()">Cancel Game</button>
                 </div>
             </div>
@@ -45,40 +42,70 @@ title: Play vs Computer
     </div>
 </div>
 
-<!-- Correct chess libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/oakmac/chessboardjs/dist/chessboard-1.0.0.min.css">
-<script src="https://cdn.jsdelivr.net/gh/oakmac/chessboardjs/dist/chessboard-1.0.0.min.js"></script>
+<!-- Chess libraries -->
+<link rel="stylesheet" href="https://chessboardjs.com/dist/chessboard-1.0.0.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://chessboardjs.com/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://chesspastebin.com/chess.js"></script>
 
-<script type="module">
+<script>
     /* -------------------------
        CHESS GAME LOGIC
     ------------------------- */
 
     let game = null;
     let board = null;
+    let isComputerTurn = false;
 
     function startGame() {
-        game = new window.Chess();
+        game = new Chess();
 
-        board = window.Chessboard('board', {
+        board = ChessBoard('board', {
             draggable: true,
             position: 'start',
-            onDrop: onPlayerMove
+            onDrop: onPlayerMove,
+            pieceTheme: 'https://chessboardjs.com/dist/chesspieces/wikipedia/{piece}.png'
         });
+
+        updateGameStatus("Your turn - play white");
+    }
+
+    function updateGameStatus(msg) {
+        document.getElementById("gameStatus").textContent = msg;
     }
 
     function botMove() {
-        const moves = game.moves();
-        if (moves.length === 0) return;
+        if (game.game_over()) {
+            updateGameStatus("Game Over!");
+            return;
+        }
 
-        const move = moves[Math.floor(Math.random() * moves.length)];
-        game.move(move);
+        isComputerTurn = true;
+        updateGameStatus("Bot thinking...");
 
-        board.position(game.fen(), true);
+        setTimeout(() => {
+            const moves = game.moves();
+            if (moves.length === 0) {
+                updateGameStatus("Checkmate or Stalemate!");
+                return;
+            }
+
+            const move = moves[Math.floor(Math.random() * moves.length)];
+            game.move(move);
+            board.position(game.fen());
+
+            if (game.game_over()) {
+                updateGameStatus("Bot wins!");
+            } else {
+                updateGameStatus("Your turn");
+            }
+            isComputerTurn = false;
+        }, 500);
     }
 
     function onPlayerMove(source, target) {
+        if (isComputerTurn) return 'snapback';
+
         const move = game.move({
             from: source,
             to: target,
@@ -86,6 +113,13 @@ title: Play vs Computer
         });
 
         if (move === null) return 'snapback';
+
+        board.position(game.fen());
+
+        if (game.game_over()) {
+            updateGameStatus("You win!");
+            return;
+        }
 
         setTimeout(botMove, 300);
     }
@@ -198,6 +232,20 @@ title: Play vs Computer
         if (botParam) {
             const bot = botDatabase.find(b => b.id === botParam);
             if (bot) {
+                selectedBot = bot;
+                showGameScreen();
+            }
+        }
+    }
+
+    async function initializeApp() {
+        await loadUserRating();
+        displayBots();
+        checkUrlParameters();
+    }
+
+    waitForFirebase();
+</script>
                 selectedBot = bot;
                 showGameScreen();
             }

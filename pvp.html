@@ -3,22 +3,504 @@ layout: default
 title: Play vs Player
 ---
 
-<div class="container">
+<div class="container" style="max-width: 900px;">
     <h1>Player vs Player</h1>
 
-    <div class="card">
-        <h3>Create or Join a Game</h3>
-        <p>
-            PvP functionality is coming soon! You'll be able to:
-        </p>
-        <ul>
-            <li>Create a new game and share the link</li>
-            <li>Join an existing game</li>
-            <li>Play with time controls</li>
-            <li>Track your rating</li>
-        </ul>
+    <!-- Main Menu -->
+    <div id="mainMenu" style="display: block;">
+        <div class="row" style="margin-top: 2rem;">
+            <div class="col-md-6">
+                <div class="card text-center">
+                    <h3>Create New Game</h3>
+                    <p>Generate a game link to share with a friend</p>
+                    <button class="btn btn-primary btn-lg w-100" onclick="createNewGame()">Create Game</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-center">
+                    <h3>Join Game</h3>
+                    <p>Enter a game ID to join an ongoing game</p>
+                    <input type="text" id="gameIdInput" class="form-control" placeholder="Enter Game ID">
+                    <button class="btn btn-success btn-lg w-100" style="margin-top: 1rem;" onclick="joinGame()">Join Game</button>
+                </div>
+            </div>
+        </div>
 
-        <button class="btn btn-disabled" disabled>Create Game (Coming Soon)</button>
-        <button class="btn btn-disabled" disabled>Join Game (Coming Soon)</button>
+        <hr style="margin: 2rem 0;">
+
+        <div class="card">
+            <h3>Active Games</h3>
+            <div id="activeGamesList"></div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" style="display: none;">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 id="gameTitle">Chess Game</h3>
+                        <button class="btn btn-sm btn-danger" onclick="returnToMenu()">Exit Game</button>
+                    </div>
+
+                    <p id="gameStatus" style="font-style: italic; color: #666; margin-bottom: 0.5rem;"></p>
+
+                    <div style="margin-top: 1rem; background: #8B7355; width: 400px; height: 400px; border: 2px solid #444;">
+                        <div id="board"></div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-warning" onclick="resignGame()" id="resignBtn">Resign</button>
+                        <button class="btn btn-info" onclick="offerDraw()" id="drawBtn">Offer Draw</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <h4>Game Info</h4>
+                    <p><strong>Game ID:</strong> <br><code id="displayGameId" style="font-size: 11px; word-break: break-all;"></code></p>
+                    <button class="btn btn-info btn-sm w-100" onclick="copyGameId()">Copy Link</button>
+                    
+                    <hr>
+
+                    <p><strong>You:</strong> <span id="yourColor" class="badge badge-primary"></span></p>
+                    <p><strong>Opponent:</strong> <span id="opponentName"></span></p>
+                    <p><strong>Opponent Status:</strong> <span id="opponentStatus" style="font-size: 12px;"></span></p>
+
+                    <hr>
+
+                    <p><strong>Move History</strong></p>
+                    <div id="moveHistory" style="max-height: 150px; overflow-y: auto; background: #f5f5f5; padding: 0.5rem; border-radius: 3px; font-size: 12px;">
+                        No moves yet
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Waiting Screen -->
+    <div id="waitingScreen" style="display: none;">
+        <div class="card text-center" style="margin-top: 3rem;">
+            <h3>Waiting for Opponent...</h3>
+            <p>Share this link with your friend:</p>
+            <div style="background: #f5f5f5; padding: 1rem; border-radius: 5px; margin: 1rem 0;">
+                <code id="waitingGameLink" style="display: block; word-break: break-all; font-size: 14px;"></code>
+            </div>
+            <button class="btn btn-info" onclick="copyWaitingLink()">Copy Link</button>
+            <button class="btn btn-danger" style="margin-left: 0.5rem;" onclick="cancelWaiting()">Cancel</button>
+            <p style="margin-top: 1rem; color: #999;">Automatically checking for opponent...</p>
+        </div>
     </div>
 </div>
+
+<!-- Chess libraries -->
+<link rel="stylesheet" href="https://chessboardjs.com/dist/chessboard-1.0.0.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://chessboardjs.com/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://chesspastebin.com/chess.js"></script>
+
+<script>
+    let db, auth;
+    let getDoc, setDoc, updateDoc, doc, query, where, collection, getDocs, onSnapshot, serverTimestamp, addDoc, deleteDoc;
+
+    const GAME_CHECK_INTERVAL = 2000; // Check for opponent every 2 seconds
+    let checkInterval = null;
+    let gameListener = null;
+
+    let game = null;
+    let board = null;
+    let currentGameId = null;
+    let currentUserUid = null;
+    let currentUserNickname = null;
+    let playerColor = null; // 'white' or 'black'
+    let moveHistory = [];
+
+    async function waitForFirebase() {
+        let attempts = 0;
+        while ((!window.auth || !window.db) && attempts < 100) {
+            await new Promise(r => setTimeout(r, 50));
+            attempts++;
+        }
+
+        if (!window.auth || !window.db) {
+            console.error("Firebase failed to initialize");
+            alert("Firebase connection failed");
+            return;
+        }
+
+        try {
+            const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+
+            getDoc = firestoreModule.getDoc;
+            setDoc = firestoreModule.setDoc;
+            updateDoc = firestoreModule.updateDoc;
+            deleteDoc = firestoreModule.deleteDoc;
+            doc = firestoreModule.doc;
+            query = firestoreModule.query;
+            where = firestoreModule.where;
+            collection = firestoreModule.collection;
+            getDocs = firestoreModule.getDocs;
+            onSnapshot = firestoreModule.onSnapshot;
+            serverTimestamp = firestoreModule.serverTimestamp;
+            addDoc = firestoreModule.addDoc;
+
+            db = window.db;
+            auth = window.auth;
+
+            initializeApp();
+        } catch (error) {
+            console.error("Error loading Firebase modules:", error);
+        }
+    }
+
+    async function initializeApp() {
+        if (auth.currentUser) {
+            currentUserUid = auth.currentUser.uid;
+            await loadUserNickname();
+            loadActiveGames();
+            checkUrlForGameId();
+        }
+    }
+
+    async function loadUserNickname() {
+        try {
+            const userDoc = await getDoc(doc(db, "users", currentUserUid));
+            if (userDoc.exists()) {
+                currentUserNickname = userDoc.data().nickname || "Anonymous";
+            }
+        } catch (err) {
+            console.error("Error loading nickname:", err);
+            currentUserNickname = "Player";
+        }
+    }
+
+    function generateGameId() {
+        return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
+    window.createNewGame = async function () {
+        const gameId = generateGameId();
+        const gameData = {
+            gameId: gameId,
+            whitePlayerId: currentUserUid,
+            whiteNickname: currentUserNickname,
+            blackPlayerId: null,
+            blackNickname: null,
+            moves: [],
+            fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            status: "waiting", // waiting, active, completed
+            winner: null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        };
+
+        try {
+            await setDoc(doc(db, "games", gameId), gameData);
+            showWaitingScreen(gameId);
+            checkForOpponent(gameId);
+        } catch (err) {
+            console.error("Error creating game:", err);
+            alert("Failed to create game");
+        }
+    };
+
+    function showWaitingScreen(gameId) {
+        currentGameId = gameId;
+        playerColor = 'white';
+        const link = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
+        document.getElementById("waitingGameLink").textContent = link;
+        document.getElementById("mainMenu").style.display = "none";
+        document.getElementById("waitingScreen").style.display = "block";
+    }
+
+    async function checkForOpponent(gameId) {
+        checkInterval = setInterval(async () => {
+            try {
+                const gameDoc = await getDoc(doc(db, "games", gameId));
+                if (gameDoc.exists() && gameDoc.data().status === "active") {
+                    clearInterval(checkInterval);
+                    startGame(gameId, gameDoc.data());
+                }
+            } catch (err) {
+                console.error("Error checking for opponent:", err);
+            }
+        }, GAME_CHECK_INTERVAL);
+    }
+
+    window.copyWaitingLink = function () {
+        const link = document.getElementById("waitingGameLink").textContent;
+        navigator.clipboard.writeText(link);
+        alert("Game link copied to clipboard!");
+    };
+
+    window.cancelWaiting = function () {
+        if (checkInterval) clearInterval(checkInterval);
+        if (currentGameId) {
+            deleteDoc(doc(db, "games", currentGameId));
+        }
+        currentGameId = null;
+        document.getElementById("waitingScreen").style.display = "none";
+        document.getElementById("mainMenu").style.display = "block";
+    };
+
+    window.joinGame = async function () {
+        const gameId = document.getElementById("gameIdInput").value.trim().toUpperCase();
+        if (!gameId) {
+            alert("Please enter a game ID");
+            return;
+        }
+
+        try {
+            const gameDoc = await getDoc(doc(db, "games", gameId));
+            if (!gameDoc.exists()) {
+                alert("Game not found");
+                return;
+            }
+
+            const gameData = gameDoc.data();
+            if (gameData.status !== "waiting") {
+                alert("Game is no longer available");
+                return;
+            }
+
+            if (gameData.whitePlayerId === currentUserUid) {
+                alert("You are already in this game!");
+                return;
+            }
+
+            // Join as black player
+            await updateDoc(doc(db, "games", gameId), {
+                blackPlayerId: currentUserUid,
+                blackNickname: currentUserNickname,
+                status: "active",
+                updatedAt: serverTimestamp()
+            });
+
+            playerColor = 'black';
+            startGame(gameId, gameData);
+        } catch (err) {
+            console.error("Error joining game:", err);
+            alert("Failed to join game");
+        }
+    };
+
+    function checkUrlForGameId() {
+        const params = new URLSearchParams(window.location.search);
+        const gameId = params.get("gameId");
+        if (gameId) {
+            document.getElementById("gameIdInput").value = gameId;
+        }
+    }
+
+    async function loadActiveGames() {
+        try {
+            const q = query(
+                collection(db, "games"),
+                where("status", "==", "waiting")
+            );
+            const querySnapshot = await getDocs(q);
+
+            const gamesList = document.getElementById("activeGamesList");
+            gamesList.innerHTML = "";
+
+            if (querySnapshot.empty) {
+                gamesList.innerHTML = "<p style='color: #999;'>No active games waiting for players</p>";
+                return;
+            }
+
+            querySnapshot.forEach(doc => {
+                const game = doc.data();
+                if (game.whitePlayerId !== currentUserUid) {
+                    const row = document.createElement("div");
+                    row.style.paddingBottom = "0.5rem";
+                    row.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: #f5f5f5; border-radius: 3px;">
+                            <span><strong>${game.whiteNickname}</strong> (White) - waiting for opponent</span>
+                            <button class="btn btn-sm btn-success" onclick="quickJoin('${game.gameId}')">Join as Black</button>
+                        </div>
+                    `;
+                    gamesList.appendChild(row);
+                }
+            });
+        } catch (err) {
+            console.error("Error loading active games:", err);
+        }
+    }
+
+    window.quickJoin = async function (gameId) {
+        document.getElementById("gameIdInput").value = gameId;
+        await window.joinGame();
+    };
+
+    function startGame(gameId, gameData) {
+        currentGameId = gameId;
+        document.getElementById("mainMenu").style.display = "none";
+        document.getElementById("waitingScreen").style.display = "none";
+        document.getElementById("gameScreen").style.display = "block";
+
+        document.getElementById("displayGameId").textContent = gameId;
+        document.getElementById("yourColor").textContent = playerColor.toUpperCase();
+        document.getElementById("opponentName").textContent = playerColor === 'white' ? gameData.blackNickname : gameData.whiteNickname;
+
+        game = new Chess();
+        board = ChessBoard('board', {
+            draggable: playerColor === 'white' ? gameData.status === "active" : playerColor === 'black' && gameData.status === "active",
+            position: 'start',
+            onDrop: onPlayerMove,
+            orientation: playerColor,
+            pieceTheme: 'https://chessboardjs.com/dist/chesspieces/wikipedia/{piece}.png'
+        });
+
+        listenForGameUpdates(gameId);
+        updateGameStatus();
+    }
+
+    let isListening = false;
+
+    function listenForGameUpdates(gameId) {
+        if (isListening) return;
+        isListening = true;
+
+        gameListener = onSnapshot(doc(db, "games", gameId), (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const gameData = docSnapshot.data();
+                
+                // Update board position
+                if (gameData.fen) {
+                    game.load(gameData.fen);
+                    board.position(game.fen());
+                }
+
+                // Update opponent status
+                const opponentId = playerColor === 'white' ? gameData.blackPlayerId : gameData.whitePlayerId;
+                document.getElementById("opponentStatus").textContent = opponentId ? "Connected" : "Waiting...";
+
+                // Update game status
+                if (gameData.status === "completed") {
+                    document.getElementById("gameStatus").textContent = `Game Over! ${gameData.winner ? "Winner: " + gameData.winner : "Draw"}`;
+                    board.orientation(playerColor);
+                    board.draggable = false;
+                }
+
+                // Update move history
+                moveHistory = gameData.moves || [];
+                updateMoveHistory();
+            }
+        });
+    }
+
+    function updateMoveHistory() {
+        const historyDiv = document.getElementById("moveHistory");
+        if (moveHistory.length === 0) {
+            historyDiv.textContent = "No moves yet";
+            return;
+        }
+
+        let html = "";
+        for (let i = 0; i < moveHistory.length; i += 2) {
+            const moveNum = Math.floor(i / 2) + 1;
+            const whiteMove = moveHistory[i] || "";
+            const blackMove = moveHistory[i + 1] || "";
+            html += `<div><strong>${moveNum}.</strong> ${whiteMove} ${blackMove}</div>`;
+        }
+        historyDiv.innerHTML = html;
+    }
+
+    async function onPlayerMove(source, target) {
+        // Determine whose turn it is
+        const isWhiteTurn = game.turn() === 'w';
+        if ((playerColor === 'white' && !isWhiteTurn) || (playerColor === 'black' && isWhiteTurn)) {
+            return 'snapback'; // Not your turn
+        }
+
+        const move = game.move({
+            from: source,
+            to: target,
+            promotion: 'q'
+        });
+
+        if (move === null) return 'snapback';
+
+        // Update move history
+        moveHistory.push(move.san);
+
+        // Update game in Firestore
+        try {
+            const gameDoc = doc(db, "games", currentGameId);
+            let updateData = {
+                fen: game.fen(),
+                moves: moveHistory,
+                updatedAt: serverTimestamp()
+            };
+
+            // Check for game end
+            if (game.game_over()) {
+                updateData.status = "completed";
+                if (game.in_checkmate()) {
+                    updateData.winner = game.turn() === 'w' ? "Black" : "White";
+                } else {
+                    updateData.winner = "Draw";
+                }
+            }
+
+            await updateDoc(gameDoc, updateData);
+        } catch (err) {
+            console.error("Error updating game:", err);
+        }
+    }
+
+    function updateGameStatus() {
+        const isWhiteTurn = game.turn() === 'w';
+        const turnPlayer = isWhiteTurn ? "White" : "Black";
+        const isYourTurn = (playerColor === 'white' && isWhiteTurn) || (playerColor === 'black' && !isWhiteTurn);
+
+        if (game.game_over()) {
+            if (game.in_checkmate()) {
+                const winner = game.turn() === 'w' ? "Black" : "White";
+                document.getElementById("gameStatus").textContent = `Checkmate! ${winner} wins!`;
+            } else {
+                document.getElementById("gameStatus").textContent = "Draw";
+            }
+        } else {
+            document.getElementById("gameStatus").textContent = isYourTurn ? "Your turn to move" : `Waiting for opponent (${turnPlayer} to move)`;
+        }
+    }
+
+    window.resignGame = async function () {
+        if (confirm("Are you sure you want to resign?")) {
+            const opponent = playerColor === 'white' ? "Black" : "White";
+            await updateDoc(doc(db, "games", currentGameId), {
+                status: "completed",
+                winner: opponent,
+                updatedAt: serverTimestamp()
+            });
+        }
+    };
+
+    window.offerDraw = async function () {
+        alert("Draw offer feature coming soon!");
+    };
+
+    window.copyGameId = function () {
+        const gameId = document.getElementById("displayGameId").textContent;
+        const link = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
+        navigator.clipboard.writeText(link);
+        alert("Game link copied!");
+    };
+
+    window.returnToMenu = function () {
+        if (gameListener) gameListener();
+        if (checkInterval) clearInterval(checkInterval);
+        currentGameId = null;
+        playerColor = null;
+        moveHistory = [];
+        isListening = false;
+        document.getElementById("gameScreen").style.display = "none";
+        document.getElementById("mainMenu").style.display = "block";
+        loadActiveGames();
+    };
+
+    waitForFirebase();
+</script>
