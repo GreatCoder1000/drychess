@@ -21,7 +21,8 @@ title: Play vs Computer
                     <p>Bot Rating: <span id="currentBotRating" class="badge badge-info"></span></p>
                     <p>Your Rating: <span id="userRating" class="badge badge-info"></span></p>
 
-                    <div style="margin-top: 1rem; background: #8B7355; width: 400px; height: 400px; border: 2px solid #444;">
+                    <div
+                        style="margin-top: 1rem; background: #8B7355; width: 400px; height: 400px; border: 2px solid #444;">
                         <div id="board"></div>
                     </div>
 
@@ -246,17 +247,17 @@ title: Play vs Computer
 
     waitForFirebase();
 </script>
-                selectedBot = bot;
-                showGameScreen();
-            }
-        }
-    }
+selectedBot = bot;
+showGameScreen();
+}
+}
+}
 
-    async function initializeApp() {
-        await loadUserRating();
-        displayBots();
-        checkUrlParameters();
-    }
+async function initializeApp() {
+await loadUserRating();
+displayBots();
+checkUrlParameters();
+}
 
-    waitForFirebase();
+waitForFirebase();
 </script>

@@ -21,7 +21,8 @@ title: Play vs Player
                     <h3>Join Game</h3>
                     <p>Enter a game ID to join an ongoing game</p>
                     <input type="text" id="gameIdInput" class="form-control" placeholder="Enter Game ID">
-                    <button class="btn btn-success btn-lg w-100" style="margin-top: 1rem;" onclick="joinGame()">Join Game</button>
+                    <button class="btn btn-success btn-lg w-100" style="margin-top: 1rem;" onclick="joinGame()">Join
+                        Game</button>
                 </div>
             </div>
         </div>
@@ -46,7 +47,8 @@ title: Play vs Player
 
                     <p id="gameStatus" style="font-style: italic; color: #666; margin-bottom: 0.5rem;"></p>
 
-                    <div style="margin-top: 1rem; background: #8B7355; width: 400px; height: 400px; border: 2px solid #444;">
+                    <div
+                        style="margin-top: 1rem; background: #8B7355; width: 400px; height: 400px; border: 2px solid #444;">
                         <div id="board"></div>
                     </div>
 
@@ -60,9 +62,10 @@ title: Play vs Player
             <div class="col-md-4">
                 <div class="card">
                     <h4>Game Info</h4>
-                    <p><strong>Game ID:</strong> <br><code id="displayGameId" style="font-size: 11px; word-break: break-all;"></code></p>
+                    <p><strong>Game ID:</strong> <br><code id="displayGameId"
+                            style="font-size: 11px; word-break: break-all;"></code></p>
                     <button class="btn btn-info btn-sm w-100" onclick="copyGameId()">Copy Link</button>
-                    
+
                     <hr>
 
                     <p><strong>You:</strong> <span id="yourColor" class="badge badge-primary"></span></p>
@@ -72,7 +75,8 @@ title: Play vs Player
                     <hr>
 
                     <p><strong>Move History</strong></p>
-                    <div id="moveHistory" style="max-height: 150px; overflow-y: auto; background: #f5f5f5; padding: 0.5rem; border-radius: 3px; font-size: 12px;">
+                    <div id="moveHistory"
+                        style="max-height: 150px; overflow-y: auto; background: #f5f5f5; padding: 0.5rem; border-radius: 3px; font-size: 12px;">
                         No moves yet
                     </div>
                 </div>
@@ -366,7 +370,7 @@ title: Play vs Player
         gameListener = onSnapshot(doc(db, "games", gameId), (docSnapshot) => {
             if (docSnapshot.exists()) {
                 const gameData = docSnapshot.data();
-                
+
                 // Update board position
                 if (gameData.fen) {
                     game.load(gameData.fen);
