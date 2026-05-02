@@ -60,12 +60,12 @@ title: Play vs Computer
 
     function startGame() {
         console.log("startGame() called");
-        
+
         if (typeof Chess === 'undefined') {
             console.error("Chess.js not loaded");
             return;
         }
-        
+
         game = new Chess();
         console.log("Chess game created");
 
@@ -74,7 +74,7 @@ title: Play vs Computer
             console.error("Board element not found");
             return;
         }
-        
+
         const boardConfig = {
             draggable: true,
             position: 'start',
@@ -89,7 +89,7 @@ title: Play vs Computer
             console.error("Chessboard initialization failed:", err);
             return;
         }
-        
+
         updateGameStatus("Your turn - play white");
     }
 
