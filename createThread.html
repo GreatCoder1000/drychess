@@ -41,13 +41,30 @@ title: Create Thread
 </div>
 
 <script type="module">
+    const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+
+    let db, collection, addDoc, serverTimestamp;
+    db = window.db;
+
+    collection = firestoreModule.collection;
+    doc = firestoreModule.doc;
+    getDoc = firestoreModule.getDoc;
+    getDocs = firestoreModule.getDocs;
+    addDoc = firestoreModule.addDoc;
+    updateDoc = firestoreModule.updateDoc;
+
+    serverTimestamp = firestoreModule.serverTimestamp;
+    increment = firestoreModule.increment;
+
+    orderBy = firestoreModule.orderBy;
+    query = firestoreModule.query;
+
     async function getUserNickname(uid) {
         const userDoc = await getDoc(doc(db, "users", uid));
         if (!userDoc.exists()) return "Unknown user";
         return userDoc.data().nickname || "Unknown user";
     }
 
-    let db, collection, addDoc, serverTimestamp;
 
     async function waitForFirebase() {
         let attempts = 0;
