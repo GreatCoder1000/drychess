@@ -1,0 +1,234 @@
+---
+layout: default
+title: Thread
+---
+
+<div class="container" style="max-width: 800px;">
+    <div id="threadContainer" style="display: none;">
+        <div class="card">
+            <h1 id="threadTitle">Loading...</h1>
+            <div id="threadMeta" style="font-size: 0.85rem; color: #666;"></div>
+            <hr>
+
+            <div id="postsContainer">
+                <p>Loading posts...</p>
+            </div>
+
+            <hr>
+
+            <div id="replySection">
+                <h4>Reply</h4>
+                <div id="replyError" class="text-danger mb-2"></div>
+                <textarea id="replyInput" class="form-control" rows="3" placeholder="Write a reply..."></textarea>
+                <button id="replyBtn" class="btn btn-primary mt-2">Post Reply</button>
+            </div>
+
+            <hr>
+            <button class="btn btn-secondary" onclick="window.location.href='/drychess/forum.html'">Back to Forum</button>
+        </div>
+    </div>
+
+    <div id="errorContainer" style="display: none;">
+        <div class="card">
+            <p class="text-danger"><strong>Error:</strong> <span id="errorMessage"></span></p>
+            <button class="btn btn-primary" onclick="window.location.href='/drychess/forum.html'">Back to Forum</button>
+        </div>
+    </div>
+
+    <div id="loadingContainer">
+        <div class="card">
+            <p>Loading thread...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    let db,
+        collection,
+        doc,
+        getDoc,
+        getDocs,
+        orderBy,
+        query,
+        addDoc,
+        updateDoc,
+        serverTimestamp,
+        increment;
+
+    let threadId = null;
+
+    async function waitForFirebase() {
+        let attempts = 0;
+        while ((!window.db || !window.auth) && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+        }
+
+        if (!window.db || !window.auth) {
+            showError("Firebase not initialized");
+            return;
+        }
+
+        try {
+            const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+            db = window.db;
+            collection = firestoreModule.collection;
+            doc = firestoreModule.doc;
+            getDoc = firestoreModule.getDoc;
+            getDocs = firestoreModule.getDocs;
+            orderBy = firestoreModule.orderBy;
+            query = firestoreModule.query;
+            addDoc = firestoreModule.addDoc;
+            updateDoc = firestoreModule.updateDoc;
+            serverTimestamp = firestoreModule.serverTimestamp;
+            increment = firestoreModule.increment;
+
+            threadId = getThreadIdFromUrl();
+            if (!threadId) {
+                showError("No thread ID provided. Use ?tid=THREAD_ID");
+                return;
+            }
+
+            document.getElementById("replyBtn").addEventListener("click", postReply);
+
+            loadThread();
+        } catch (err) {
+            console.error(err);
+            showError("Could not load Firebase");
+        }
+    }
+
+    function getThreadIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("tid");
+    }
+
+    function showError(message) {
+        document.getElementById("loadingContainer").style.display = "none";
+        document.getElementById("threadContainer").style.display = "none";
+        document.getElementById("errorContainer").style.display = "block";
+        document.getElementById("errorMessage").textContent = message;
+    }
+
+    async function loadThread() {
+        try {
+            const threadSnap = await getDoc(doc(db, "forumThreads", threadId));
+
+            if (!threadSnap.exists()) {
+                showError("Thread not found");
+                return;
+            }
+
+            const data = threadSnap.data();
+
+            document.getElementById("threadTitle").textContent = data.title || "Untitled thread";
+            const postCount = data.postCount || 0;
+            document.getElementById("threadMeta").textContent =
+                `${postCount} post${postCount === 1 ? "" : "s"}`;
+
+            document.getElementById("loadingContainer").style.display = "none";
+            document.getElementById("errorContainer").style.display = "none";
+            document.getElementById("threadContainer").style.display = "block";
+
+            await loadPosts();
+        } catch (err) {
+            console.error("Error loading thread:", err);
+            showError("Error loading thread: " + err.message);
+        }
+    }
+
+    async function loadPosts() {
+        const container = document.getElementById("postsContainer");
+        container.innerHTML = "<p>Loading posts...</p>";
+
+        try {
+            const q = query(
+                collection(db, "forumThreads", threadId, "posts"),
+                orderBy("createdAt", "asc")
+            );
+
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                container.innerHTML = "<p>No posts yet.</p>";
+                return;
+            }
+
+            container.innerHTML = "";
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+
+                const postDiv = document.createElement("div");
+                postDiv.className = "mb-3 p-2";
+                postDiv.style.border = "1px solid #ddd";
+                postDiv.style.borderRadius = "4px";
+
+                const author = document.createElement("div");
+                author.style.fontSize = "0.85rem";
+                author.style.color = "#666";
+                author.textContent = data.authorName || "Unknown user";
+
+                const content = document.createElement("div");
+                content.textContent = data.content || "";
+                content.style.marginTop = "0.25rem";
+
+                postDiv.appendChild(author);
+                postDiv.appendChild(content);
+                container.appendChild(postDiv);
+            });
+        } catch (err) {
+            console.error("Error loading posts:", err);
+            container.innerHTML = `<p class="text-danger">Error loading posts: ${err.message}</p>`;
+        }
+    }
+
+    async function postReply() {
+        const auth = window.auth;
+        const user = auth.currentUser;
+        const errorDiv = document.getElementById("replyError");
+        const input = document.getElementById("replyInput");
+        const btn = document.getElementById("replyBtn");
+
+        errorDiv.textContent = "";
+
+        if (!user) {
+            errorDiv.textContent = "You must be logged in to reply.";
+            return;
+        }
+
+        const content = input.value.trim();
+        if (!content) {
+            errorDiv.textContent = "Reply cannot be empty.";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Posting...";
+
+        try {
+            await addDoc(collection(db, "forumThreads", threadId, "posts"), {
+                authorUid: user.uid,
+                authorName: user.displayName || null,
+                content,
+                createdAt: serverTimestamp()
+            });
+
+            await updateDoc(doc(db, "forumThreads", threadId), {
+                lastUpdated: serverTimestamp(),
+                postCount: increment(1)
+            });
+
+            input.value = "";
+            await loadPosts();
+        } catch (err) {
+            console.error("Error posting reply:", err);
+            errorDiv.textContent = "Error: " + err.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Post Reply";
+        }
+    }
+
+    waitForFirebase();
+</script>

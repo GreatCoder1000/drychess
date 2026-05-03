@@ -1,0 +1,128 @@
+---
+layout: default
+title: Forum
+---
+
+<div class="container" style="max-width: 800px;">
+    <div id="forumContainer" style="display: none;">
+        <div class="card">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>Forum</h1>
+                <button class="btn btn-primary" onclick="window.location.href='/drychess/createThread.html'">
+                    New Thread
+                </button>
+            </div>
+            <hr>
+            <div id="threadsContainer">
+                <p>Loading threads...</p>
+            </div>
+            <hr>
+            <button class="btn btn-secondary" onclick="window.location.href='/drychess/community.html'">
+                Back to Community
+            </button>
+        </div>
+    </div>
+
+    <div id="errorContainer" style="display: none;">
+        <div class="card">
+            <p class="text-danger"><strong>Error:</strong> <span id="errorMessage"></span></p>
+            <button class="btn btn-primary" onclick="window.location.href='/drychess/community.html'">Back to
+                Community</button>
+        </div>
+    </div>
+
+    <div id="loadingContainer">
+        <div class="card">
+            <p>Loading forum...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    let db, collection, getDocs, orderBy, query;
+
+    async function waitForFirebase() {
+        let attempts = 0;
+        while ((!window.db || !window.auth) && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+        }
+
+        if (!window.db || !window.auth) {
+            showError("Firebase not initialized");
+            return;
+        }
+
+        try {
+            const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+            db = window.db;
+            collection = firestoreModule.collection;
+            getDocs = firestoreModule.getDocs;
+            orderBy = firestoreModule.orderBy;
+            query = firestoreModule.query;
+
+            loadThreads();
+        } catch (err) {
+            console.error(err);
+            showError("Could not load Firebase");
+        }
+    }
+
+    function showError(message) {
+        document.getElementById("loadingContainer").style.display = "none";
+        document.getElementById("forumContainer").style.display = "none";
+        document.getElementById("errorContainer").style.display = "block";
+        document.getElementById("errorMessage").textContent = message;
+    }
+
+    async function loadThreads() {
+        const threadsContainer = document.getElementById("threadsContainer");
+
+        try {
+            const q = query(
+                collection(db, "forumThreads"),
+                orderBy("lastUpdated", "desc")
+            );
+
+            const snapshot = await getDocs(q);
+
+            document.getElementById("loadingContainer").style.display = "none";
+            document.getElementById("errorContainer").style.display = "none";
+            document.getElementById("forumContainer").style.display = "block";
+
+            if (snapshot.empty) {
+                threadsContainer.innerHTML = "<p>No threads yet. Be the first to create one!</p>";
+                return;
+            }
+
+            threadsContainer.innerHTML = "";
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const div = document.createElement("div");
+                div.className = "mb-3";
+
+                const titleLink = document.createElement("a");
+                titleLink.href = `/drychess/thread.html?tid=${docSnap.id}`;
+                titleLink.textContent = data.title || "Untitled thread";
+                titleLink.style.fontSize = "1.1rem";
+                titleLink.style.fontWeight = "bold";
+
+                const meta = document.createElement("div");
+                meta.style.fontSize = "0.85rem";
+                meta.style.color = "#666";
+                const postCount = data.postCount || 0;
+                meta.textContent = `${postCount} post${postCount === 1 ? "" : "s"}`;
+
+                div.appendChild(titleLink);
+                div.appendChild(meta);
+                threadsContainer.appendChild(div);
+            });
+        } catch (err) {
+            console.error("Error loading threads:", err);
+            showError("Error loading threads: " + err.message);
+        }
+    }
+
+    waitForFirebase();
+</script>

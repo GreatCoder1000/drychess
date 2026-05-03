@@ -1,0 +1,142 @@
+---
+layout: default
+title: Create Thread
+---
+
+<div class="container" style="max-width: 700px;">
+    <div id="createContainer" style="display: none;">
+        <div class="card">
+            <h1>Create New Thread</h1>
+            <hr>
+
+            <div id="createError" class="text-danger mb-2"></div>
+
+            <div class="form-group">
+                <label><strong>Title</strong></label>
+                <input id="threadTitle" class="form-control" placeholder="Enter thread title">
+            </div>
+
+            <div class="form-group mt-3">
+                <label><strong>First post</strong></label>
+                <textarea id="firstPost" class="form-control" rows="5"
+                    placeholder="Write the first post..."></textarea>
+            </div>
+
+            <button id="createBtn" class="btn btn-success mt-3">Create Thread</button>
+            <button class="btn btn-secondary mt-3" onclick="window.location.href='/drychess/forum.html'">Cancel</button>
+        </div>
+    </div>
+
+    <div id="errorContainer" style="display: none;">
+        <div class="card">
+            <p class="text-danger"><strong>Error:</strong> <span id="errorMessage"></span></p>
+            <button class="btn btn-primary" onclick="window.location.href='/drychess/forum.html'">Back to Forum</button>
+        </div>
+    </div>
+
+    <div id="loadingContainer">
+        <div class="card">
+            <p>Loading...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    let db, collection, addDoc, serverTimestamp;
+
+    async function waitForFirebase() {
+        let attempts = 0;
+        while ((!window.db || !window.auth) && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+        }
+
+        if (!window.db || !window.auth) {
+            showError("Firebase not initialized");
+            return;
+        }
+
+        try {
+            const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+            db = window.db;
+            collection = firestoreModule.collection;
+            addDoc = firestoreModule.addDoc;
+            serverTimestamp = firestoreModule.serverTimestamp;
+
+            document.getElementById("loadingContainer").style.display = "none";
+            document.getElementById("errorContainer").style.display = "none";
+            document.getElementById("createContainer").style.display = "block";
+
+            document.getElementById("createBtn").addEventListener("click", createThread);
+        } catch (err) {
+            console.error(err);
+            showError("Could not load Firebase");
+        }
+    }
+
+    function showError(message) {
+        document.getElementById("loadingContainer").style.display = "none";
+        document.getElementById("createContainer").style.display = "none";
+        document.getElementById("errorContainer").style.display = "block";
+        document.getElementById("errorMessage").textContent = message;
+    }
+
+    async function createThread() {
+        const titleInput = document.getElementById("threadTitle");
+        const firstPostInput = document.getElementById("firstPost");
+        const errorDiv = document.getElementById("createError");
+        const btn = document.getElementById("createBtn");
+
+        errorDiv.textContent = "";
+
+        const title = titleInput.value.trim();
+        const content = firstPostInput.value.trim();
+
+        if (!title) {
+            errorDiv.textContent = "Title cannot be empty.";
+            return;
+        }
+        if (!content) {
+            errorDiv.textContent = "First post cannot be empty.";
+            return;
+        }
+
+        const auth = window.auth;
+        const user = auth.currentUser;
+
+        if (!user) {
+            errorDiv.textContent = "You must be logged in to create a thread.";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Creating...";
+
+        try {
+            const threadRef = await addDoc(collection(db, "forumThreads"), {
+                title,
+                authorUid: user.uid,
+                authorName: user.displayName || null,
+                createdAt: serverTimestamp(),
+                lastUpdated: serverTimestamp(),
+                postCount: 1
+            });
+
+            await addDoc(collection(db, "forumThreads", threadRef.id, "posts"), {
+                authorUid: user.uid,
+                authorName: user.displayName || null,
+                content,
+                createdAt: serverTimestamp()
+            });
+
+            window.location.href = `/drychess/thread.html?tid=${threadRef.id}`;
+        } catch (err) {
+            console.error("Error creating thread:", err);
+            errorDiv.textContent = "Error: " + err.message;
+            btn.disabled = false;
+            btn.textContent = "Create Thread";
+        }
+    }
+
+    waitForFirebase();
+</script>
