@@ -117,8 +117,8 @@ title: Community
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${rank}</td>
-                    <td><a href="/drychess/profile.html?uid=${player.uid}" style="color: var(--pumpkin); text-decoration: none;">${player.nickname}</a></td>
-                    <td><strong>${player.rating}${FLAIR_EMOJIS[player.flairId]}</strong></td>
+                    <td><a href="/drychess/profile.html?uid=${player.uid}" style="color: var(--pumpkin); text-decoration: none;">${player.nickname}${FLAIR_EMOJIS[player.flairId]}</a></td>
+                    <td><strong>${player.rating}</strong></td>
                     <td><strong>${player.xp}</strong></td>
                     <td>${player.games}</td>
                 `;
