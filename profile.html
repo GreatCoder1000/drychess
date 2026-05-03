@@ -81,20 +81,11 @@ title: Player Profile
     </div>
 </div>
 
+<script src="flairs.js"></script>
 <script type="module">
     let db, getDoc, doc, updateDoc;
     let currentUserUid = null;
     let profileUid = null;
-    const FLAIR_EMOJIS = [
-        "",
-        "😀",
-        "😇",
-        "🎃",
-        "😈",
-        "💀",
-        "🤣"
-    ];
-
     // Wait for Firebase to be initialized
     async function waitForFirebase() {
         let attempts = 0;
