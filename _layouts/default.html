@@ -134,7 +134,8 @@
                 } catch { }
 
                 navUser.textContent = label;
-                navUser.href = "#";
+                navUser.href = "/drychess/profile.html?uid=" + user.uid;
+                navUser.title = "View your profile";
 
                 if (logoutBtn) logoutBtn.style.display = "block";
             } else {

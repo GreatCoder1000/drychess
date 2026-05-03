@@ -97,7 +97,6 @@ title: Player Profile
         }
 
         if (!window.db || !window.auth) {
-            console.error("Firebase failed to initialize");
             showError("Firebase not initialized");
             return;
         }
@@ -110,15 +109,17 @@ title: Player Profile
             updateDoc = firestoreModule.updateDoc;
             db = window.db;
 
-            // Get current user
-            currentUserUid = window.auth.currentUser?.uid;
+            // 🔥 FIX: Wait for auth to finish loading
+            window.auth.onAuthStateChanged(user => {
+                currentUserUid = user?.uid || null;
+                loadProfile();
+            });
 
-            loadProfile();
         } catch (error) {
-            console.error("Error loading Firebase modules:", error);
             showError("Could not load Firebase");
         }
     }
+
 
     function showError(message) {
         document.getElementById("loadingContainer").style.display = "none";

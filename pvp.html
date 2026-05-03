@@ -100,10 +100,10 @@ title: Play vs Player
 </div>
 
 <!-- Chess libraries -->
-<link rel="stylesheet" href="https://chessboardjs.com/dist/chessboard-1.0.0.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://chessboardjs.com/dist/chessboard-1.0.0.min.js"></script>
-<script src="https://chesspastebin.com/chess.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <script>
     let db, auth;
@@ -348,14 +348,26 @@ title: Play vs Player
         document.getElementById("yourColor").textContent = playerColor.toUpperCase();
         document.getElementById("opponentName").textContent = playerColor === 'white' ? gameData.blackNickname : gameData.whiteNickname;
 
+        if (typeof Chess === 'undefined') {
+            console.error("Chess.js library not loaded");
+            alert("Error: Chess library failed to load");
+            return;
+        }
+
         game = new Chess();
-        board = ChessBoard('board', {
-            draggable: playerColor === 'white' ? gameData.status === "active" : playerColor === 'black' && gameData.status === "active",
-            position: 'start',
-            onDrop: onPlayerMove,
-            orientation: playerColor,
-            pieceTheme: 'https://chessboardjs.com/dist/chesspieces/wikipedia/{piece}.png'
-        });
+        
+        try {
+            board = Chessboard('board', {
+                draggable: playerColor === 'white' ? gameData.status === "active" : playerColor === 'black' && gameData.status === "active",
+                position: 'start',
+                onDrop: onPlayerMove,
+                orientation: playerColor,
+                pieceTheme: 'https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chesspieces/wikipedia/{piece}.png'
+            });
+        } catch (err) {
+            console.error("Chessboard initialization failed:", err);
+            alert("Error: Chessboard failed to initialize");
+        }
 
         listenForGameUpdates(gameId);
         updateGameStatus();
@@ -495,8 +507,14 @@ title: Play vs Player
     };
 
     window.returnToMenu = function () {
-        if (gameListener) gameListener();
-        if (checkInterval) clearInterval(checkInterval);
+        try {
+            if (gameListener && typeof gameListener === 'function') {
+                gameListener();
+            }
+            if (checkInterval) clearInterval(checkInterval);
+        } catch (err) {
+            console.error("Error cleaning up game listeners:", err);
+        }
         currentGameId = null;
         playerColor = null;
         moveHistory = [];
