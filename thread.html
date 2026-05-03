@@ -24,7 +24,8 @@ title: Thread
             </div>
 
             <hr>
-            <button class="btn btn-secondary" onclick="window.location.href='/drychess/forum.html'">Back to Forum</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/drychess/forum.html'">Back to
+                Forum</button>
         </div>
     </div>
 
@@ -43,6 +44,12 @@ title: Thread
 </div>
 
 <script type="module">
+    async function getUserNickname(uid) {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (!userDoc.exists()) return "Unknown user";
+        return userDoc.data().nickname || "Unknown user";
+    }
+
     let db,
         collection,
         doc,
@@ -209,7 +216,7 @@ title: Thread
         try {
             await addDoc(collection(db, "forumThreads", threadId, "posts"), {
                 authorUid: user.uid,
-                authorName: user.displayName || null,
+                authorName: await getUserNickname(user.uid),
                 content,
                 createdAt: serverTimestamp()
             });

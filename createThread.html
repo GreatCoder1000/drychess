@@ -18,8 +18,7 @@ title: Create Thread
 
             <div class="form-group mt-3">
                 <label><strong>First post</strong></label>
-                <textarea id="firstPost" class="form-control" rows="5"
-                    placeholder="Write the first post..."></textarea>
+                <textarea id="firstPost" class="form-control" rows="5" placeholder="Write the first post..."></textarea>
             </div>
 
             <button id="createBtn" class="btn btn-success mt-3">Create Thread</button>
@@ -42,6 +41,12 @@ title: Create Thread
 </div>
 
 <script type="module">
+    async function getUserNickname(uid) {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (!userDoc.exists()) return "Unknown user";
+        return userDoc.data().nickname || "Unknown user";
+    }
+
     let db, collection, addDoc, serverTimestamp;
 
     async function waitForFirebase() {
@@ -116,7 +121,7 @@ title: Create Thread
             const threadRef = await addDoc(collection(db, "forumThreads"), {
                 title,
                 authorUid: user.uid,
-                authorName: user.displayName || null,
+                authorName: await getUserNickname(user.uid),
                 createdAt: serverTimestamp(),
                 lastUpdated: serverTimestamp(),
                 postCount: 1
@@ -124,7 +129,7 @@ title: Create Thread
 
             await addDoc(collection(db, "forumThreads", threadRef.id, "posts"), {
                 authorUid: user.uid,
-                authorName: user.displayName || null,
+                authorName: await getUserNickname(user.uid),
                 content,
                 createdAt: serverTimestamp()
             });
