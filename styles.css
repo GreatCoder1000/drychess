@@ -1,6 +1,6 @@
 :root {
     --pumpkin: #ff8050;
-    --Matte Black: #28282B;
+    --matte-black: #28282B;
 }
 
 body {
@@ -99,4 +99,18 @@ h3 {
 
 h3:hover {
     transform: translateX(4px);
+}
+
+/* === Fix for dropdown layout: === */
+
+/* Make navbar appear above cards */
+.navbar {
+    position: relative;
+    z-index: 1000;
+}
+
+/* Make dropdown menus appear above cards */
+.navbar .dropdown-menu {
+    position: absolute;
+    z-index: 2000;
 }
