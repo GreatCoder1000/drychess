@@ -46,32 +46,7 @@ title: Thread
 <script type="module">
     const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
 
-    let db,
-        collection,
-        doc,
-        getDoc,
-        getDocs,
-        orderBy,
-        query,
-        addDoc,
-        updateDoc,
-        serverTimestamp,
-        increment;
-    db = window.db;
-
-    collection = firestoreModule.collection;
-    doc = firestoreModule.doc;
-    getDoc = firestoreModule.getDoc;
-    getDocs = firestoreModule.getDocs;
-    addDoc = firestoreModule.addDoc;
-    updateDoc = firestoreModule.updateDoc;
-
-    serverTimestamp = firestoreModule.serverTimestamp;
-    increment = firestoreModule.increment;
-
-    orderBy = firestoreModule.orderBy;
-    query = firestoreModule.query;
-
+    let addDoc, db, doc, collection, getDoc, getDocs, increment, orderBy, serverTimestamp, updateDoc, query;
 
     async function getUserNickname(uid) {
         const userDoc = await getDoc(doc(db, "users", uid));
@@ -96,17 +71,21 @@ title: Thread
 
         try {
             const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+
             db = window.db;
+
             collection = firestoreModule.collection;
             doc = firestoreModule.doc;
             getDoc = firestoreModule.getDoc;
             getDocs = firestoreModule.getDocs;
-            orderBy = firestoreModule.orderBy;
-            query = firestoreModule.query;
             addDoc = firestoreModule.addDoc;
             updateDoc = firestoreModule.updateDoc;
+
             serverTimestamp = firestoreModule.serverTimestamp;
             increment = firestoreModule.increment;
+
+            orderBy = firestoreModule.orderBy;
+            query = firestoreModule.query;
 
             threadId = getThreadIdFromUrl();
             if (!threadId) {
