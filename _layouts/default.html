@@ -22,7 +22,6 @@
 <body>
 
     <!-- NAVBAR -->
-    <!-- NAVBAR -->
     <nav class="navbar navbar-default" role="navigation" style="padding: 0 1rem;">
         <div class="navbar-header">
             <a href="{{ '/index.html' | relative_url }}" class="navbar-brand">
@@ -113,6 +112,20 @@
         &copy; 2025 GreatCoder1000<br>
         Made with GitHub Pages, Jekyll &amp; Firebase.
     </footer>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        $('ul.nav li.dropdown').hover(
+            function () {
+                $(this).find('.dropdown-menu').stop(true, true).delay(100).fadeIn(150);
+            },
+            function () {
+                $(this).find('.dropdown-menu').stop(true, true).delay(100).fadeOut(150);
+            }
+        );
+    </script>
 
     <!-- CLEAN GLOBAL FIREBASE SCRIPT -->
     <script type="module">
