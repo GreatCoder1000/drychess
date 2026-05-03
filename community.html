@@ -15,6 +15,7 @@ title: Community
                         <th>Rank</th>
                         <th>Player</th>
                         <th>Rating</th>
+                        <th>XP</th>
                         <th>Games</th>
                     </tr>
                 </thead>
@@ -31,6 +32,16 @@ title: Community
 <script type="module">
     let db;
     let getDocs, collection;
+    const FLAIR_EMOJIS = [
+        "",
+        "😀",
+        "😇",
+        "🎃",
+        "😈",
+        "💀",
+        "🤣"
+    ];
+
 
     // Wait for Firebase to be initialized
     async function waitForFirebase() {
@@ -90,6 +101,8 @@ title: Community
                     uid: doc.id,
                     nickname: data.nickname || "Unknown",
                     rating: data.rating || 1200,
+                    xp: data.xp || 0,
+                    flairId: data.flairId || 0,
                     games: data.games || 0
                 });
             });
@@ -105,7 +118,7 @@ title: Community
                 row.innerHTML = `
                     <td>${rank}</td>
                     <td><a href="/drychess/profile.html?uid=${player.uid}" style="color: var(--pumpkin); text-decoration: none;">${player.nickname}</a></td>
-                    <td><strong>${player.rating}</strong></td>
+                    <td><strong>${player.rating}${FLAIR_EMOJIS[player.flairId]}</strong></td>
                     <td><strong>${player.xp}</strong></td>
                     <td>${player.games}</td>
                 `;
