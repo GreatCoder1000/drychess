@@ -52,9 +52,17 @@
                 </ul>
             </li>
 
-            <!-- LEARN (no dropdown) -->
-            <li><a class="nav-link" href="{{ '/learn.html' | relative_url }}">LEARN 👨‍🎓</a></li>
-
+            <!-- LEARN (with dropdown) -->
+            <li class="dropdown">
+                <a href="{{ '/learn.html' | relative_url }}" class="dropdown-toggle" data-toggle="dropdown">
+                    LEARN 👨‍🎓 <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ '/learn.html' | relative_url }}">RULES 📏</a></li>
+                    <li><a href="{{ '/timecontrols.html' | relative_url }}">TIME CONTROLS ⏲</a></li>
+                </ul>
+            </li>
+            
             <!-- WATCH (no dropdown) -->
             <li><a class="nav-link" href="{{ '/watch.html' | relative_url }}">WATCH 👀</a></li>
 
