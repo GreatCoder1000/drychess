@@ -5,7 +5,14 @@
  * Requires: db (global Firestore instance), getDoc, doc functions
  */
 async function getUserNickname(uid) {
-  const userDoc = await getDoc(doc(db, "users", uid));
+  const firestoreGetDoc = window.getDoc || getDoc;
+  const firestoreDoc = window.doc || doc;
+
+  if (typeof firestoreGetDoc !== "function" || typeof firestoreDoc !== "function") {
+    throw new Error("Firestore helpers are not available: getDoc/doc");
+  }
+
+  const userDoc = await firestoreGetDoc(firestoreDoc(db, "users", uid));
   if (!userDoc.exists()) return "Unknown user";
   return userDoc.data().nickname || "Unknown user";
 }

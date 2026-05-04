@@ -75,6 +75,9 @@ title: Thread
             addDoc = firestoreModule.addDoc;
             updateDoc = firestoreModule.updateDoc;
 
+            window.doc = doc;
+            window.getDoc = getDoc;
+
             serverTimestamp = firestoreModule.serverTimestamp;
             increment = firestoreModule.increment;
 
