@@ -1,2 +1,2 @@
 // Remember also to update profile.html dropdown
-const FLAIR_EMOJIS = ["", "😀", "😇", "🎃", "😈", "💀", "🤣", "😎"];
+const FLAIR_EMOJIS = ["", "😀", "😇", "🎃", "😈", "💀", "🤣", "😎", "🤑", "🤬", "🫡"];
