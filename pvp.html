@@ -105,6 +105,7 @@ title: Play vs Player
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="shared.js"></script>
 
 <script>
     let db, auth;
@@ -121,6 +122,10 @@ title: Play vs Player
     let currentUserNickname = null;
     let playerColor = null; // 'white' or 'black'
     let moveHistory = [];
+    let currentPlayerRating = 1200;
+    let opponentRating = 1200;
+    let opponentUserId = null;
+    let playerEloUpdated = false; // Track if we already updated ELO for this game
 
     async function waitForFirebase() {
         let attempts = 0;
@@ -164,6 +169,7 @@ title: Play vs Player
         if (auth.currentUser) {
             currentUserUid = auth.currentUser.uid;
             await loadUserNickname();
+            await loadCurrentPlayerRating();
             loadActiveGames();
             checkUrlForGameId();
         }
@@ -181,8 +187,69 @@ title: Play vs Player
         }
     }
 
+    async function loadCurrentPlayerRating() {
+        try {
+            const userDoc = await getDoc(doc(db, "users", currentUserUid));
+            if (userDoc.exists() && userDoc.data().rating) {
+                currentPlayerRating = userDoc.data().rating;
+            }
+        } catch (err) {
+            console.error("Error loading current player rating:", err);
+        }
+    }
+
+    async function loadOpponentRating(opponentId) {
+        try {
+            const userDoc = await getDoc(doc(db, "users", opponentId));
+            if (userDoc.exists() && userDoc.data().rating) {
+                opponentRating = userDoc.data().rating;
+            }
+        } catch (err) {
+            console.error("Error loading opponent rating:", err);
+        }
+    }
+
     function generateGameId() {
         return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
+    async function updateBothPlayersElo(gameData) {
+        if (playerEloUpdated) return; // Only update once per game
+        playerEloUpdated = true;
+
+        try {
+            // Determine result for current player
+            let playerResult = 0.5; // draw
+            if (gameData.winner && gameData.winner !== "Draw") {
+                const currentPlayerColor = playerColor === 'white' ? 'White' : 'Black';
+                playerResult = gameData.winner === currentPlayerColor ? 1 : 0;
+            }
+
+            // Calculate ELO changes (K-factor of 32 for PvP games)
+            const playerElo = calculateEloChange(currentPlayerRating, opponentRating, playerResult, 32);
+            const opponentResult = playerResult === 1 ? 0 : (playerResult === 0.5 ? 0.5 : 1);
+            const opponentElo = calculateEloChange(opponentRating, currentPlayerRating, opponentResult, 32);
+
+            // Update current player's rating
+            await setDoc(
+                doc(db, "users", currentUserUid),
+                { rating: playerElo.newRating },
+                { merge: true }
+            );
+
+            // Update opponent's rating
+            if (opponentUserId) {
+                await setDoc(
+                    doc(db, "users", opponentUserId),
+                    { rating: opponentElo.newRating },
+                    { merge: true }
+                );
+            }
+
+            console.log(`PvP ELO Updated - You: ${playerElo.ratingChange > 0 ? '+' : ''}${playerElo.ratingChange} (${playerElo.newRating}), Opponent: ${opponentElo.ratingChange > 0 ? '+' : ''}${opponentElo.ratingChange} (${opponentElo.newRating})`);
+        } catch (err) {
+            console.error("Error updating PvP ratings:", err);
+        }
     }
 
     window.createNewGame = async function () {
@@ -341,6 +408,9 @@ title: Play vs Player
 
     function startGame(gameId, gameData) {
         currentGameId = gameId;
+        opponentUserId = playerColor === 'white' ? gameData.blackPlayerId : gameData.whitePlayerId;
+        playerEloUpdated = false;
+        
         document.getElementById("mainMenu").style.display = "none";
         document.getElementById("waitingScreen").style.display = "none";
         document.getElementById("gameScreen").style.display = "block";
@@ -348,6 +418,11 @@ title: Play vs Player
         document.getElementById("displayGameId").textContent = gameId;
         document.getElementById("yourColor").textContent = playerColor.toUpperCase();
         document.getElementById("opponentName").textContent = playerColor === 'white' ? gameData.blackNickname : gameData.whiteNickname;
+
+        // Load opponent's rating
+        if (opponentUserId) {
+            loadOpponentRating(opponentUserId);
+        }
 
         if (typeof Chess === 'undefined') {
             console.error("Chess.js library not loaded");
@@ -394,11 +469,14 @@ title: Play vs Player
                 const opponentId = playerColor === 'white' ? gameData.blackPlayerId : gameData.whitePlayerId;
                 document.getElementById("opponentStatus").textContent = opponentId ? "Connected" : "Waiting...";
 
-                // Update game status
+                // Update game status and handle ELO
                 if (gameData.status === "completed") {
                     document.getElementById("gameStatus").textContent = `Game Over! ${gameData.winner ? "Winner: " + gameData.winner : "Draw"}`;
                     board.orientation(playerColor);
                     board.draggable = false;
+                    
+                    // Update ELO ratings for both players
+                    updateBothPlayersElo(gameData);
                 }
 
                 // Update move history

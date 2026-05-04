@@ -81,3 +81,53 @@ async function waitForFirebaseReady(checkAuth = true) {
   );
   return false;
 }
+
+/**
+ * Calculate ELO rating change based on game result
+ * Returns object with newRating and ratingChange
+ * @param playerRating - Player's current rating
+ * @param opponentRating - Opponent's current rating
+ * @param result - 1 for win, 0.5 for draw, 0 for loss
+ * @param kFactor - K-factor (volatility): 32 for rated games, 16 for bots
+ */
+function calculateEloChange(playerRating, opponentRating, result, kFactor = 32) {
+  // Expected score: probability that player wins
+  const expectedScore = 1 / (1 + Math.pow(10, (opponentRating - playerRating) / 400));
+
+  // Rating change
+  const ratingChange = Math.round(kFactor * (result - expectedScore));
+  const newRating = Math.max(0, playerRating + ratingChange);
+
+  return {
+    newRating: newRating,
+    ratingChange: ratingChange,
+    expectedScore: expectedScore,
+  };
+}
+
+/**
+ * Update user rating in Firestore after a game
+ * Requires: db (global Firestore instance), setDoc, doc functions
+ * @param uid - User ID
+ * @param newRating - New rating after game
+ */
+async function updateUserRating(uid, newRating) {
+  const firestoreSetDoc = window.setDoc || setDoc;
+  const firestoreDoc = window.doc || doc;
+
+  if (typeof firestoreSetDoc !== "function" || typeof firestoreDoc !== "function") {
+    throw new Error("Firestore helpers are not available: setDoc/doc");
+  }
+
+  try {
+    await firestoreSetDoc(
+      firestoreDoc(db, "users", uid),
+      { rating: newRating },
+      { merge: true }
+    );
+    return true;
+  } catch (error) {
+    console.error("Error updating rating:", error);
+    return false;
+  }
+}

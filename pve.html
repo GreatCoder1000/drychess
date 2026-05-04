@@ -48,6 +48,7 @@ title: Play vs Computer
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="shared.js"></script>
 
 <script>
     /* -------------------------
@@ -98,53 +99,77 @@ title: Play vs Computer
     }
 
     function botMove() {
-        if (game.game_over()) {
-            updateGameStatus("Game Over!");
-            return;
-        }
-
-        isComputerTurn = true;
-        updateGameStatus("Bot thinking...");
-
-        setTimeout(() => {
-            const moves = game.moves();
-            if (moves.length === 0) {
-                updateGameStatus("Checkmate or Stalemate!");
+        async function executeBotMove() {
+            if (game.game_over()) {
+                if (game.in_checkmate()) {
+                    updateGameStatus("You win +" + lastRatingChange + " ELO!");
+                    await updatePlayerElo(1); // Player wins
+                } else {
+                    updateGameStatus("Draw " + (lastRatingChange >= 0 ? '+' : '') + lastRatingChange + " ELO");
+                    await updatePlayerElo(0.5); // Draw
+                }
                 return;
             }
 
-            const move = moves[Math.floor(Math.random() * moves.length)];
-            game.move(move);
-            board.position(game.fen());
+            isComputerTurn = true;
+            updateGameStatus("Bot thinking...");
 
-            if (game.game_over()) {
-                updateGameStatus("Bot wins!");
-            } else {
-                updateGameStatus("Your turn");
-            }
-            isComputerTurn = false;
-        }, 500);
+            setTimeout(() => {
+                const moves = game.moves();
+                if (moves.length === 0) {
+                    updateGameStatus("Checkmate or Stalemate!");
+                    return;
+                }
+
+                const move = moves[Math.floor(Math.random() * moves.length)];
+                game.move(move);
+                board.position(game.fen());
+
+                if (game.game_over()) {
+                    if (game.in_checkmate()) {
+                        updateGameStatus("Bot wins " + lastRatingChange + " ELO");
+                        updatePlayerElo(0); // Player loses (no await needed here)
+                    } else {
+                        updateGameStatus("Draw " + (lastRatingChange >= 0 ? '+' : '') + lastRatingChange + " ELO");
+                        updatePlayerElo(0.5); // Draw (no await needed here)
+                    }
+                } else {
+                    updateGameStatus("Your turn");
+                }
+                isComputerTurn = false;
+            }, 500);
+        }
+        executeBotMove();
     }
 
     function onPlayerMove(source, target) {
-        if (isComputerTurn) return 'snapback';
+        async function executePlayerMove() {
+            if (isComputerTurn) return 'snapback';
 
-        const move = game.move({
-            from: source,
-            to: target,
-            promotion: 'q'
-        });
+            const move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q'
+            });
 
-        if (move === null) return 'snapback';
+            if (move === null) return 'snapback';
 
-        board.position(game.fen());
+            board.position(game.fen());
 
-        if (game.game_over()) {
-            updateGameStatus("You win!");
-            return;
+            if (game.game_over()) {
+                if (game.in_checkmate()) {
+                    updateGameStatus("You win! Calculating ELO...");
+                    await updatePlayerElo(1); // Player wins
+                } else {
+                    updateGameStatus("Draw! Calculating ELO...");
+                    await updatePlayerElo(0.5); // Draw
+                }
+                return;
+            }
+
+            setTimeout(botMove, 300);
         }
-
-        setTimeout(botMove, 300);
+        executePlayerMove();
     }
 
     /* -------------------------
@@ -152,7 +177,8 @@ title: Play vs Computer
     ------------------------- */
 
     let db, auth;
-    let getDoc, doc;
+    let getDoc, doc, setDoc;
+    let lastRatingChange = 0;
 
     const botDatabase = [
         { id: "bot-rookie", name: "Rookiebomb", level: 1, rating: 400, description: "Perfect for beginners" },
@@ -180,12 +206,43 @@ title: Play vs Computer
 
             getDoc = firestoreModule.getDoc;
             doc = firestoreModule.doc;
+            setDoc = firestoreModule.setDoc;
             db = window.db;
             auth = window.auth;
+            
+            // Expose to global scope for shared.js
+            window.getDoc = getDoc;
+            window.doc = doc;
+            window.setDoc = setDoc;
 
             initializeApp();
         } catch (error) {
             console.error("Error loading Firebase modules:", error);
+        }
+    }
+
+    async function updatePlayerElo(result) {
+        try {
+            const user = auth.currentUser;
+            if (!user || !selectedBot) return;
+
+            // Calculate ELO change using standard chess K-factor of 16 for rated games vs bots
+            const eloCalc = calculateEloChange(userRating, selectedBot.rating, result, 16);
+            lastRatingChange = eloCalc.ratingChange;
+            const newRating = eloCalc.newRating;
+
+            // Update Firestore
+            await setDoc(
+                doc(db, "users", user.uid),
+                { rating: newRating },
+                { merge: true }
+            );
+
+            userRating = newRating;
+            document.getElementById("userRating").textContent = userRating;
+            console.log(`Rating updated: ${eloCalc.ratingChange > 0 ? '+' : ''}${eloCalc.ratingChange} (${userRating})`);
+        } catch (err) {
+            console.error("Error updating rating:", err);
         }
     }
 
