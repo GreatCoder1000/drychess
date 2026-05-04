@@ -86,7 +86,8 @@
         </ul>
 
         <!-- DARK MODE TOGGLE -->
-        <button id="darkModeToggle" class="dark-mode-toggle" title="Toggle Dark Mode" onclick="toggleDarkMode()" style="margin-left: 1rem;">🌙</button>
+        <button id="darkModeToggle" class="dark-mode-toggle" title="Toggle Dark Mode" onclick="toggleDarkMode()"
+            style="margin-left: 1rem;">🌙</button>
     </nav>
 
     <!-- PAGE CONTENT -->
@@ -213,7 +214,7 @@
     <!-- DARK MODE SCRIPT -->
     <script>
         // Initialize theme immediately on script load
-        (function() {
+        (function () {
             const body = document.body;
             const savedTheme = localStorage.getItem('theme') || 'light';
             body.setAttribute('data-theme', savedTheme);
@@ -259,7 +260,7 @@
             updateToggleIcon(currentTheme);
 
             // Toggle dark mode (additional event listener as backup)
-            darkModeToggle.addEventListener('click', function(event) {
+            darkModeToggle.addEventListener('click', function (event) {
                 event.preventDefault();
                 console.log('Dark mode toggle clicked (event listener)');
 
