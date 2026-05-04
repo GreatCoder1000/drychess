@@ -1,8 +1,10 @@
 :root {
     --pumpkin: #ff8050;
+    --blob: #fd8;
     --matte-black: #28282B;
 
     /* Light mode colors */
+    --accent: var(--pumpkin);
     --bg-gradient-start: #fff7f2;
     --bg-gradient-end: #ffe1d1;
     --navbar-bg: rgba(255, 128, 0, 0.25);
@@ -22,6 +24,7 @@
 
 /* Dark mode colors */
 [data-theme="dark"] {
+    --accent: var(--blob);
     --bg-gradient-start: #1a1a1a;
     --bg-gradient-end: #2d2d2d;
     --navbar-bg: rgba(40, 40, 43, 0.9);
@@ -60,7 +63,7 @@ body {
 }
 
 .navbar-brand {
-    color: var(--pumpkin) !important;
+    color: var(--accent) !important;
     font-weight: bold;
     text-decoration: none;
     font-size: 1.1rem;
@@ -111,7 +114,7 @@ body {
 }
 
 h1, h2, h3 {
-    color: var(--pumpkin)
+    color: var(--accent)
 }
 
 .btn-disabled {
@@ -139,7 +142,7 @@ h1, h2, h3 {
 }
 
 h3 {
-    color: var(--pumpkin);
+    color: var(--accent);
     transition: 0.3s ease;
 }
 
@@ -164,8 +167,8 @@ h3:hover {
 /* Dark mode toggle button */
 .dark-mode-toggle {
     background: rgba(255, 128, 80, 0.1) !important;
-    border: 2px solid var(--pumpkin) !important;
-    color: var(--pumpkin) !important;
+    border: 2px solid var(--accent) !important;
+    color: var(--accent) !important;
     font-size: 1.2rem !important;
     cursor: pointer !important;
     padding: 0.5rem !important;
@@ -185,7 +188,7 @@ h3:hover {
 .dark-mode-toggle:hover {
     background: rgba(255, 128, 80, 0.2) !important;
     transform: scale(1.1) !important;
-    outline: 2px solid var(--pumpkin) !important;
+    outline: 2px solid var(--accent) !important;
     box-shadow: 0 0 10px rgba(255, 128, 80, 0.3) !important;
 }
 
@@ -210,7 +213,7 @@ footer {
 }
 
 .navbar-nav .nav-link:hover {
-    color: var(--pumpkin);
+    color: var(--accent);
 }
 
 .dropdown-menu {
@@ -226,7 +229,7 @@ footer {
 
 .dropdown-menu li a:hover {
     background: var(--navbar-bg);
-    color: var(--pumpkin);
+    color: var(--accent);
 }
 
 .btn {
@@ -241,6 +244,6 @@ footer {
 }
 
 .form-control:focus {
-    border-color: var(--pumpkin);
+    border-color: var(--accent);
     box-shadow: 0 0 0 0.2rem rgba(255, 128, 80, 0.25);
 }
