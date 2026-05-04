@@ -83,10 +83,10 @@
 
             <!-- LOGOUT -->
             <li><a id="logoutBtn" href="#" style="color: var(--logout-color);">LOGOUT</a></li>
-
-            <!-- DARK MODE TOGGLE -->
-            <li><button id="darkModeToggle" class="dark-mode-toggle" title="Toggle Dark Mode">🌙</button></li>
         </ul>
+
+        <!-- DARK MODE TOGGLE -->
+        <button id="darkModeToggle" class="dark-mode-toggle" title="Toggle Dark Mode" onclick="toggleDarkMode()" style="margin-left: 1rem;">🌙</button>
     </nav>
 
     <!-- PAGE CONTENT -->
@@ -212,28 +212,81 @@
 
     <!-- DARK MODE SCRIPT -->
     <script>
-        // Dark mode functionality
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
+        // Initialize theme immediately on script load
+        (function() {
+            const body = document.body;
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            body.setAttribute('data-theme', savedTheme);
+            console.log('Initial theme set to:', savedTheme);
+        })();
 
-        // Check for saved theme preference or default to light mode
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        body.setAttribute('data-theme', currentTheme);
-        updateToggleIcon(currentTheme);
-
-        // Toggle dark mode
-        darkModeToggle.addEventListener('click', () => {
-            const currentTheme = body.getAttribute('data-theme');
+        // Global function for onclick fallback
+        function toggleDarkMode() {
+            console.log('toggleDarkMode called');
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
             body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
-            updateToggleIcon(newTheme);
-        });
 
-        function updateToggleIcon(theme) {
-            darkModeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
-            darkModeToggle.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            const button = document.getElementById('darkModeToggle');
+            if (button) {
+                button.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+                button.title = newTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            }
+
+            console.log('Theme toggled to:', newTheme);
+        }
+
+        // Dark mode functionality
+        function initDarkMode() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const body = document.body;
+
+            if (!darkModeToggle) {
+                console.error('Dark mode toggle button not found!');
+                return;
+            }
+
+            console.log('Dark mode toggle button found, initializing...');
+
+            // Check for saved theme preference or default to light mode
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            console.log('Current theme from localStorage:', currentTheme);
+
+            body.setAttribute('data-theme', currentTheme);
+            updateToggleIcon(currentTheme);
+
+            // Toggle dark mode (additional event listener as backup)
+            darkModeToggle.addEventListener('click', function(event) {
+                event.preventDefault();
+                console.log('Dark mode toggle clicked (event listener)');
+
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                console.log('Switching from', currentTheme, 'to', newTheme);
+
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateToggleIcon(newTheme);
+
+                console.log('Theme switched successfully');
+            });
+
+            function updateToggleIcon(theme) {
+                darkModeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+                darkModeToggle.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+                console.log('Toggle icon updated to:', theme === 'dark' ? 'sun' : 'moon');
+            }
+        }
+
+        // Initialize dark mode when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDarkMode);
+        } else {
+            initDarkMode();
         }
     </script>
 
