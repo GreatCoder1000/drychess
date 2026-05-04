@@ -8,7 +8,10 @@ async function getUserNickname(uid) {
   const firestoreGetDoc = window.getDoc || getDoc;
   const firestoreDoc = window.doc || doc;
 
-  if (typeof firestoreGetDoc !== "function" || typeof firestoreDoc !== "function") {
+  if (
+    typeof firestoreGetDoc !== "function" ||
+    typeof firestoreDoc !== "function"
+  ) {
     throw new Error("Firestore helpers are not available: getDoc/doc");
   }
 
