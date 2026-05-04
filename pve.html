@@ -241,7 +241,8 @@ title: Play vs Computer
                 {
                     rating: newRating,
                     pveGames: (userData.pveGames || 0) + 1,
-                    games: (userData.games || 0) + 1
+                    games: (userData.games || 0) + 1,
+                    xp: (userData.xp) + (selectedBot.level * 3)
                 },
                 { merge: true }
             );
