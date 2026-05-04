@@ -48,7 +48,6 @@ title: Play vs Computer
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-<script src="https://unpkg.com/stockfish@16.1.0/dist/stockfish.js"></script>
 <script src="shared.js"></script>
 
 <script>
@@ -59,63 +58,6 @@ title: Play vs Computer
     let game = null;
     let board = null;
     let isComputerTurn = false;
-    let stockfish = null;
-
-    async function initStockfish() {
-        return new Promise((resolve) => {
-            Stockfish().then(sf => {
-                stockfish = sf;
-                // Initialize stockfish with options
-                stockfish.postMessage('setoption name Threads value 1');
-                stockfish.postMessage('setoption name Hash value 64');
-                resolve();
-            }).catch(() => {
-                console.warn("Stockfish failed to load, falling back to random moves");
-                resolve();
-            });
-        });
-    }
-
-    async function getBestMove(depth = 10) {
-        return new Promise((resolve) => {
-            if (!stockfish) {
-                // Fallback: return random move if Stockfish unavailable
-                const moves = game.moves();
-                resolve(moves[Math.floor(Math.random() * moves.length)]);
-                return;
-            }
-
-            let bestMove = null;
-
-            const listener = (msg) => {
-                if (msg.includes('bestmove')) {
-                    stockfish.removeEventListener('message', listener);
-                    const match = msg.match(/bestmove (\S+)/);
-                    if (match) {
-                        bestMove = match[1];
-                    } else {
-                        // Fallback to random if parsing fails
-                        const moves = game.moves();
-                        bestMove = moves[Math.floor(Math.random() * moves.length)];
-                    }
-                    resolve(bestMove);
-                }
-            };
-
-            stockfish.addEventListener('message', listener);
-            stockfish.postMessage('position fen ' + game.fen());
-            stockfish.postMessage(`go depth ${depth}`);
-
-            // Timeout fallback in case Stockfish doesn't respond
-            setTimeout(() => {
-                if (!bestMove) {
-                    stockfish.removeEventListener('message', listener);
-                    const moves = game.moves();
-                    resolve(moves[Math.floor(Math.random() * moves.length)]);
-                }
-            }, 3000);
-        });
-    }
 
     function startGame() {
         console.log("startGame() called");
@@ -149,11 +91,6 @@ title: Play vs Computer
             return;
         }
 
-        // Initialize Stockfish for bot moves
-        initStockfish().then(() => {
-            console.log("Stockfish initialized for bot");
-        });
-
         updateGameStatus("Your turn - play white");
     }
 
@@ -177,21 +114,14 @@ title: Play vs Computer
             isComputerTurn = true;
             updateGameStatus("Bot thinking...");
 
-            // Determine search depth based on bot level
-            let depth = 4; // Default
-            if (selectedBot.level === 1) depth = 2;    // Rookiebomb: very easy
-            else if (selectedBot.level === 2) depth = 4; // Pawn Pusher: medium
-            else if (selectedBot.level === 3) depth = 8; // Knight Rider: challenging
-
-            setTimeout(async () => {
+            setTimeout(() => {
                 const moves = game.moves();
                 if (moves.length === 0) {
                     updateGameStatus("Checkmate or Stalemate!");
                     return;
                 }
 
-                // Get best move from Stockfish
-                const move = await getBestMove(depth);
+                const move = moves[Math.floor(Math.random() * moves.length)];
                 game.move(move);
                 board.position(game.fen());
 
