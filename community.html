@@ -100,7 +100,13 @@ title: Community
             });
 
             // Sort by rating descending
-            players.sort((a, b) => b.rating - a.rating);
+            players.sort((a, b) => {
+                if (b.rating !== a.rating) {
+                    return b.rating - a.rating;   // primary: rating (desc)
+                }
+                return b.xp - a.xp;             // secondary: XP (desc)
+            });
+
             console.log("Sorted players:", players);
 
             // Display top 20
