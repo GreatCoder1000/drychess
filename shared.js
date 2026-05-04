@@ -90,7 +90,7 @@ async function waitForFirebaseReady(checkAuth = true) {
  * @param result - 1 for win, 0.5 for draw, 0 for loss
  * @param kFactor - K-factor (volatility): 32 for rated games, 16 for bots
  */
-window.calculateEloChange = function(
+window.calculateEloChange = function (
   playerRating,
   opponentRating,
   result,

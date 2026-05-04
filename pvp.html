@@ -233,14 +233,14 @@ title: Play vs Player
             // Get current stats for incrementing counters
             const currentPlayerDoc = await getDoc(doc(db, "users", currentUserUid));
             const opponentDoc = opponentUserId ? await getDoc(doc(db, "users", opponentUserId)) : null;
-            
+
             const currentPlayerStats = currentPlayerDoc.data() || {};
             const opponentStats = opponentDoc?.data() || {};
 
             // Update current player's rating and game counts
             await setDoc(
                 doc(db, "users", currentUserUid),
-                { 
+                {
                     rating: playerElo.newRating,
                     pvpGames: (currentPlayerStats.pvpGames || 0) + 1,
                     games: (currentPlayerStats.games || 0) + 1
@@ -252,7 +252,7 @@ title: Play vs Player
             if (opponentUserId) {
                 await setDoc(
                     doc(db, "users", opponentUserId),
-                    { 
+                    {
                         rating: opponentElo.newRating,
                         pvpGames: (opponentStats.pvpGames || 0) + 1,
                         games: (opponentStats.games || 0) + 1

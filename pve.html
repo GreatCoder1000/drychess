@@ -238,7 +238,7 @@ title: Play vs Computer
             // Update Firestore - also increment PvE games counter
             await setDoc(
                 doc(db, "users", user.uid),
-                { 
+                {
                     rating: newRating,
                     pveGames: (userData.pveGames || 0) + 1,
                     games: (userData.games || 0) + 1
