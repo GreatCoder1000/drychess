@@ -50,6 +50,10 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
+h1, h2, h3 {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
 .navbar {
     display: flex;
     align-items: center;
