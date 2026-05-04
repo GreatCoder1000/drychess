@@ -55,7 +55,7 @@
         }
 
         // Update button icon when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const button = document.getElementById('darkModeToggle');
             const body = document.body;
             const currentTheme = body.getAttribute('data-theme') || 'light';
@@ -136,7 +136,8 @@
 
         <!-- DARK MODE TOGGLE -->
         <div style="margin-left: 1rem; display: inline-block;">
-            <button id="darkModeToggle" class="dark-mode-toggle" title="Toggle Dark Mode" onclick="toggleDarkMode()">🌙</button>
+            <button id="darkModeToggle" class="dark-mode-toggle" title="Toggle Dark Mode"
+                onclick="toggleDarkMode()">🌙</button>
         </div>
     </nav>
 
