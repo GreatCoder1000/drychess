@@ -90,9 +90,15 @@ async function waitForFirebaseReady(checkAuth = true) {
  * @param result - 1 for win, 0.5 for draw, 0 for loss
  * @param kFactor - K-factor (volatility): 32 for rated games, 16 for bots
  */
-function calculateEloChange(playerRating, opponentRating, result, kFactor = 32) {
+function calculateEloChange(
+  playerRating,
+  opponentRating,
+  result,
+  kFactor = 32,
+) {
   // Expected score: probability that player wins
-  const expectedScore = 1 / (1 + Math.pow(10, (opponentRating - playerRating) / 400));
+  const expectedScore =
+    1 / (1 + Math.pow(10, (opponentRating - playerRating) / 400));
 
   // Rating change
   const ratingChange = Math.round(kFactor * (result - expectedScore));
@@ -115,7 +121,10 @@ async function updateUserRating(uid, newRating) {
   const firestoreSetDoc = window.setDoc || setDoc;
   const firestoreDoc = window.doc || doc;
 
-  if (typeof firestoreSetDoc !== "function" || typeof firestoreDoc !== "function") {
+  if (
+    typeof firestoreSetDoc !== "function" ||
+    typeof firestoreDoc !== "function"
+  ) {
     throw new Error("Firestore helpers are not available: setDoc/doc");
   }
 
@@ -123,7 +132,7 @@ async function updateUserRating(uid, newRating) {
     await firestoreSetDoc(
       firestoreDoc(db, "users", uid),
       { rating: newRating },
-      { merge: true }
+      { merge: true },
     );
     return true;
   } catch (error) {

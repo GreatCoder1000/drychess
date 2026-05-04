@@ -410,7 +410,7 @@ title: Play vs Player
         currentGameId = gameId;
         opponentUserId = playerColor === 'white' ? gameData.blackPlayerId : gameData.whitePlayerId;
         playerEloUpdated = false;
-        
+
         document.getElementById("mainMenu").style.display = "none";
         document.getElementById("waitingScreen").style.display = "none";
         document.getElementById("gameScreen").style.display = "block";
@@ -474,7 +474,7 @@ title: Play vs Player
                     document.getElementById("gameStatus").textContent = `Game Over! ${gameData.winner ? "Winner: " + gameData.winner : "Draw"}`;
                     board.orientation(playerColor);
                     board.draggable = false;
-                    
+
                     // Update ELO ratings for both players
                     updateBothPlayersElo(gameData);
                 }
