@@ -86,6 +86,7 @@ title: Player Profile
 </div>
 
 <script src="flairs.js"></script>
+<script src="shared.js"></script>
 <script type="module">
     let db, getDoc, doc, updateDoc;
     let currentUserUid = null;
@@ -122,13 +123,6 @@ title: Player Profile
         }
     }
 
-
-    function showError(message) {
-        document.getElementById("loadingContainer").style.display = "none";
-        document.getElementById("profileContainer").style.display = "none";
-        document.getElementById("errorContainer").style.display = "block";
-        document.getElementById("errorMessage").textContent = message;
-    }
 
     function toggleEdit() {
         const editSection = document.getElementById("editSection");

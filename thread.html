@@ -43,17 +43,11 @@ title: Thread
     </div>
 </div>
 
+<script src="shared.js"></script>
 <script type="module">
     const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
 
     let addDoc, db, doc, collection, getDoc, getDocs, increment, orderBy, serverTimestamp, updateDoc, query;
-
-    async function getUserNickname(uid) {
-        const userDoc = await getDoc(doc(db, "users", uid));
-        if (!userDoc.exists()) return "Unknown user";
-        return userDoc.data().nickname || "Unknown user";
-    }
-
 
     let threadId = null;
 
@@ -105,13 +99,6 @@ title: Thread
     function getThreadIdFromUrl() {
         const params = new URLSearchParams(window.location.search);
         return params.get("tid");
-    }
-
-    function showError(message) {
-        document.getElementById("loadingContainer").style.display = "none";
-        document.getElementById("threadContainer").style.display = "none";
-        document.getElementById("errorContainer").style.display = "block";
-        document.getElementById("errorMessage").textContent = message;
     }
 
     async function loadThread() {

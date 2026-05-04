@@ -38,9 +38,9 @@ title: Forum
     </div>
 </div>
 
+<script src="shared.js"></script>
 <script type="module">
     let addDoc, db, doc, collection, getDoc, getDocs, increment, orderBy, serverTimestamp, updateDoc, query;
-
 
     async function waitForFirebase() {
         let attempts = 0;
@@ -77,13 +77,6 @@ title: Forum
             console.error(err);
             showError("Could not load Firebase");
         }
-    }
-
-    function showError(message) {
-        document.getElementById("loadingContainer").style.display = "none";
-        document.getElementById("forumContainer").style.display = "none";
-        document.getElementById("errorContainer").style.display = "block";
-        document.getElementById("errorMessage").textContent = message;
     }
 
     async function loadThreads() {

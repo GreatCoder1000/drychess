@@ -40,15 +40,9 @@ title: Create Thread
     </div>
 </div>
 
+<script src="shared.js"></script>
 <script type="module">
     let addDoc, db, doc, collection, getDoc, getDocs, increment, orderBy, serverTimestamp, updateDoc, query;
-
-    async function getUserNickname(uid) {
-        const userDoc = await getDoc(doc(db, "users", uid));
-        if (!userDoc.exists()) return "Unknown user";
-        return userDoc.data().nickname || "Unknown user";
-    }
-
 
     async function waitForFirebase() {
         let attempts = 0;
@@ -88,13 +82,6 @@ title: Create Thread
             console.error(err);
             showError("Could not load Firebase");
         }
-    }
-
-    function showError(message) {
-        document.getElementById("loadingContainer").style.display = "none";
-        document.getElementById("createContainer").style.display = "none";
-        document.getElementById("errorContainer").style.display = "block";
-        document.getElementById("errorMessage").textContent = message;
     }
 
     async function createThread() {
