@@ -11,8 +11,19 @@ title: Home
                     Welcome to DryBlob!<br>
                     &nbsp;&nbsp;&nbsp;&nbsp;our website is still in development<br>
                     Start playing chess now with our AI opponents or challenge other players.<br>
-                    *but it still doesn't work lol
+                    *but it still doesn't work 🤣
                 </p>
+                <button class="btn btn-secondary" onclick="
+                        navigator.clipboard.writeText('bit.ly/4cVnS2l');
+                        const confEl = document.getElementById('copied-confirmation');
+                        document.getElementById('copied-confirmation').textContent='Copied!'
+                        const okBtnEl = document.createElement('button'); 
+                        okBtnEl.innerHTML='&times;'; 
+                        okBtnEl.onclick='confEl.innerHTML=\'\''
+                        confEl.appendChild(okBtnEl);
+                        ">Copy
+                    Shortened Link</button>
+                <span id="copied-confirmation"></span><br>
             </div>
         </div>
         <div class="col-md-8">
