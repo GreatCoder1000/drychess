@@ -45,7 +45,8 @@ title: Play vs Player
                         <button class="btn btn-sm btn-danger" onclick="returnToMenu()">Exit Game</button>
                     </div>
 
-                    <p id="gameStatus" style="font-style: italic; color: #666; margin-bottom: 0.5rem;"></p>
+                    <p id="gameStatus" style="font-style: italic; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                    </p>
 
                     <div
                         style="margin-top: 1rem; background: #8B7355; width: 400px; height: 400px; border: 2px solid #444;">
@@ -94,7 +95,7 @@ title: Play vs Player
             </div>
             <button class="btn btn-info" onclick="copyWaitingLink()">Copy Link</button>
             <button class="btn btn-danger" style="margin-left: 0.5rem;" onclick="cancelWaiting()">Cancel</button>
-            <p style="margin-top: 1rem; color: #999;">Automatically checking for opponent...</p>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">Automatically checking for opponent...</p>
         </div>
     </div>
 </div>
@@ -310,7 +311,7 @@ title: Play vs Player
             gamesList.innerHTML = "";
 
             if (querySnapshot.empty) {
-                gamesList.innerHTML = "<p style='color: #999;'>No active games waiting for players</p>";
+                gamesList.innerHTML = "<p style='color: var(--text-secondary);'>No active games waiting for players</p>";
                 return;
             }
 

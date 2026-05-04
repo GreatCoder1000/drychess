@@ -78,10 +78,14 @@
             </li>
 
             <!-- LOGIN / USER -->
-            <li><a id="navUser" href="{{ '/login.html' | relative_url }}" style="color: #09f;">LOGIN</a></li>
+            <li><a id="navUser" href="{{ '/login.html' | relative_url }}" style="color: var(--link-color);">LOGIN</a>
+            </li>
 
             <!-- LOGOUT -->
-            <li><a id="logoutBtn" href="#" style="color: #f66;">LOGOUT</a></li>
+            <li><a id="logoutBtn" href="#" style="color: var(--logout-color);">LOGOUT</a></li>
+
+            <!-- DARK MODE TOGGLE -->
+            <li><button id="darkModeToggle" class="dark-mode-toggle" title="Toggle Dark Mode">🌙</button></li>
         </ul>
     </nav>
 
@@ -92,13 +96,13 @@
 
     <!-- GLOBAL CHAT -->
     <div id="globalChatContainer"
-        style="background: #f9f9f9; padding: 1rem; margin-top: 2rem; border-top: 1px solid #ddd;">
+        style="background: var(--chat-bg); padding: 1rem; margin-top: 2rem; border-top: 1px solid var(--chat-border); transition: background 0.3s ease, border-color 0.3s ease;">
         <div class="container">
             <h3 style="color: var(--pumpkin);">Global Chat</h3>
 
             <div id="chatMessages"
-                style="max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem;">
-                <p style="text-align: center; color: #999;">Loading messages...</p>
+                style="max-height: 200px; overflow-y: auto; background: var(--chat-message-bg); border: 1px solid var(--chat-border); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; transition: background 0.3s ease, border-color 0.3s ease;">
+                <p style="text-align: center; color: var(--text-secondary);">Loading messages...</p>
             </div>
 
             <div id="chatInputContainer" style="display: none;">
@@ -111,7 +115,8 @@
             </div>
 
             <div id="chatLoginPrompt">
-                <p style="text-align: center; color: #666;"><a href="/drychess/login.html">Login</a> to join the global
+                <p style="text-align: center; color: var(--text-secondary);"><a href="/drychess/login.html"
+                        style="color: var(--link-color);">Login</a> to join the global
                     chat!</p>
             </div>
         </div>
@@ -205,6 +210,33 @@
         }
     </script>
 
+    <!-- DARK MODE SCRIPT -->
+    <script>
+        // Dark mode functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', currentTheme);
+        updateToggleIcon(currentTheme);
+
+        // Toggle dark mode
+        darkModeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateToggleIcon(newTheme);
+        });
+
+        function updateToggleIcon(theme) {
+            darkModeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            darkModeToggle.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        }
+    </script>
+
     <!-- GLOBAL CHAT SCRIPT -->
     <script type="module">
         let chatDb, chatAuth;
@@ -268,7 +300,7 @@
                 const messagesDiv = document.getElementById("chatMessages");
 
                 if (snapshot.empty) {
-                    messagesDiv.innerHTML = "<p style='text-align: center; color: #999;'>No messages yet. Start the conversation!</p>";
+                    messagesDiv.innerHTML = "<p style='text-align: center; color: var(--text-secondary);'>No messages yet. Start the conversation!</p>";
                     return;
                 }
 
@@ -283,10 +315,10 @@
                 let html = "";
                 messages.forEach(msg => {
                     const time = new Date(msg.timestamp.toDate()).toLocaleTimeString();
-                    html += `<div style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                    html += `<div style="padding: 0.5rem; border-bottom: 1px solid var(--chat-border);">
                         <strong style="color: var(--pumpkin);">${msg.nickname}</strong>
-                        <span style="color: #999; font-size: 0.85em;"> ${time}</span>
-                        <p style="margin: 0.25rem 0 0 0;">${msg.message}</p>
+                        <span style="color: var(--text-secondary); font-size: 0.85em;"> ${time}</span>
+                        <p style="margin: 0.25rem 0 0 0; color: var(--text-primary);">${msg.message}</p>
                     </div>`;
                 });
 

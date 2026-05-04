@@ -1,12 +1,50 @@
 :root {
     --pumpkin: #ff8050;
     --matte-black: #28282B;
+
+    /* Light mode colors */
+    --bg-gradient-start: #fff7f2;
+    --bg-gradient-end: #ffe1d1;
+    --navbar-bg: rgba(255, 128, 0, 0.25);
+    --navbar-border: rgba(255, 128, 0, 0.3);
+    --card-bg: #fff;
+    --card-shadow: rgba(0,0,0,0.1);
+    --text-primary: #333;
+    --text-secondary: #666;
+    --link-color: #09f;
+    --logout-color: #f66;
+    --chat-bg: #f9f9f9;
+    --chat-border: #ddd;
+    --chat-message-bg: white;
+    --footer-bg: transparent;
+    --footer-text: #666;
+}
+
+/* Dark mode colors */
+[data-theme="dark"] {
+    --bg-gradient-start: #1a1a1a;
+    --bg-gradient-end: #2d2d2d;
+    --navbar-bg: rgba(40, 40, 43, 0.9);
+    --navbar-border: rgba(255, 128, 80, 0.3);
+    --card-bg: #333;
+    --card-shadow: rgba(0,0,0,0.3);
+    --text-primary: #e0e0e0;
+    --text-secondary: #ccc;
+    --link-color: #4da6ff;
+    --logout-color: #ff6b6b;
+    --chat-bg: #2a2a2a;
+    --chat-border: #444;
+    --chat-message-bg: #333;
+    --footer-bg: #1a1a1a;
+    --footer-text: #ccc;
 }
 
 body {
     font-family: Rubik, 'Segoe UI', 'Trebuchet MS', 'Arial Nova', Arial, sans-serif;
     margin: 0;
-    background: linear-gradient(180deg, #fff7f2, #ffe1d1);
+    background: linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--text-primary);
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .navbar {
@@ -14,9 +52,10 @@ body {
     align-items: center;
     padding: 0.75rem 1.5rem;
     gap: 1rem;
-    background: rgba(255, 128, 0, 0.25);
+    background: var(--navbar-bg);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 128, 0, 0.3);
+    border-bottom: 1px solid var(--navbar-border);
+    transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .navbar-brand {
@@ -85,11 +124,12 @@ h1, h2, h3 {
 }
 
 .card {
-    background: #fff;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px var(--card-shadow);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 h3 {
@@ -113,4 +153,81 @@ h3:hover {
 .navbar .dropdown-menu {
     position: absolute;
     z-index: 2000;
+}
+
+/* Dark mode toggle button */
+.dark-mode-toggle {
+    background: none;
+    border: none;
+    color: var(--pumpkin);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.dark-mode-toggle:hover {
+    background: rgba(255, 128, 80, 0.1);
+    transform: scale(1.1);
+}
+
+.dark-mode-toggle:active {
+    transform: scale(0.95);
+}
+
+footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    background: var(--footer-bg);
+    color: var(--footer-text);
+    border-top: 1px solid var(--chat-border);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Additional dark mode styles */
+.navbar-nav .nav-link {
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--pumpkin);
+}
+
+.dropdown-menu {
+    background: var(--card-bg);
+    border: 1px solid var(--chat-border);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.dropdown-menu li a {
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.dropdown-menu li a:hover {
+    background: var(--navbar-bg);
+    color: var(--pumpkin);
+}
+
+.btn {
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.form-control {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--chat-border);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--pumpkin);
+    box-shadow: 0 0 0 0.2rem rgba(255, 128, 80, 0.25);
 }
