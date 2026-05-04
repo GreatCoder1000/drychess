@@ -90,7 +90,7 @@ async function waitForFirebaseReady(checkAuth = true) {
  * @param result - 1 for win, 0.5 for draw, 0 for loss
  * @param kFactor - K-factor (volatility): 32 for rated games, 16 for bots
  */
-function calculateEloChange(
+window.calculateEloChange = function(
   playerRating,
   opponentRating,
   result,
@@ -109,7 +109,7 @@ function calculateEloChange(
     ratingChange: ratingChange,
     expectedScore: expectedScore,
   };
-}
+};
 
 /**
  * Update user rating in Firestore after a game

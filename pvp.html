@@ -226,22 +226,37 @@ title: Play vs Player
             }
 
             // Calculate ELO changes (K-factor of 32 for PvP games)
-            const playerElo = calculateEloChange(currentPlayerRating, opponentRating, playerResult, 32);
+            const playerElo = window.calculateEloChange(currentPlayerRating, opponentRating, playerResult, 32);
             const opponentResult = playerResult === 1 ? 0 : (playerResult === 0.5 ? 0.5 : 1);
-            const opponentElo = calculateEloChange(opponentRating, currentPlayerRating, opponentResult, 32);
+            const opponentElo = window.calculateEloChange(opponentRating, currentPlayerRating, opponentResult, 32);
 
-            // Update current player's rating
+            // Get current stats for incrementing counters
+            const currentPlayerDoc = await getDoc(doc(db, "users", currentUserUid));
+            const opponentDoc = opponentUserId ? await getDoc(doc(db, "users", opponentUserId)) : null;
+            
+            const currentPlayerStats = currentPlayerDoc.data() || {};
+            const opponentStats = opponentDoc?.data() || {};
+
+            // Update current player's rating and game counts
             await setDoc(
                 doc(db, "users", currentUserUid),
-                { rating: playerElo.newRating },
+                { 
+                    rating: playerElo.newRating,
+                    pvpGames: (currentPlayerStats.pvpGames || 0) + 1,
+                    games: (currentPlayerStats.games || 0) + 1
+                },
                 { merge: true }
             );
 
-            // Update opponent's rating
+            // Update opponent's rating and game counts
             if (opponentUserId) {
                 await setDoc(
                     doc(db, "users", opponentUserId),
-                    { rating: opponentElo.newRating },
+                    { 
+                        rating: opponentElo.newRating,
+                        pvpGames: (opponentStats.pvpGames || 0) + 1,
+                        games: (opponentStats.games || 0) + 1
+                    },
                     { merge: true }
                 );
             }

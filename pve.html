@@ -227,14 +227,22 @@ title: Play vs Computer
             if (!user || !selectedBot) return;
 
             // Calculate ELO change using standard chess K-factor of 16 for rated games vs bots
-            const eloCalc = calculateEloChange(userRating, selectedBot.rating, result, 16);
+            const eloCalc = window.calculateEloChange(userRating, selectedBot.rating, result, 16);
             lastRatingChange = eloCalc.ratingChange;
             const newRating = eloCalc.newRating;
 
-            // Update Firestore
+            // Get current stats for incrementing counters
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            const userData = userDoc.data() || {};
+
+            // Update Firestore - also increment PvE games counter
             await setDoc(
                 doc(db, "users", user.uid),
-                { rating: newRating },
+                { 
+                    rating: newRating,
+                    pveGames: (userData.pveGames || 0) + 1,
+                    games: (userData.games || 0) + 1
+                },
                 { merge: true }
             );
 
