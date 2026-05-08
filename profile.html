@@ -231,7 +231,7 @@ title: Player Profile
             badgesContainer.appendChild(statusBadge);
 
             if (data.status == 2 || data.status == 3) {
-                document.getElementById("profileContainer").style.backgroundColor = "#f77";
+                document.querySelector("#profileContainer .card").style.backgroundColor = "#f77";
             }
 
             document.getElementById("playerRating").textContent = data.rating || 1200;
