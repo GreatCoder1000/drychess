@@ -1,0 +1,422 @@
+/* Grand Styles for DryChess - Super Cool UI */
+
+/* Import fancy fonts if available, or use system fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:wght@400;700&display=swap');
+
+/* Root variables for grand theme */
+:root {
+    --grand-gold: #FFD700;
+    --grand-silver: #C0C0C0;
+    --grand-bronze: #CD7F32;
+    --grand-shadow: rgba(0, 0, 0, 0.3);
+    --grand-glow: rgba(255, 215, 0, 0.5);
+    --grand-bg-start: linear-gradient(135deg, #1a1a2e, #16213e);
+    --grand-bg-end: linear-gradient(135deg, #0f3460, #1a1a2e);
+    --grand-card-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    --grand-border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+/* Body enhancements */
+body {
+    background: var(--grand-bg-start);
+    background-attachment: fixed;
+    font-family: 'Playfair Display', serif;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="chess" patternUnits="userSpaceOnUse" width="20" height="20"><rect width="20" height="20" fill="transparent"/><rect x="0" y="0" width="10" height="10" fill="rgba(255,215,0,0.02)"/><rect x="10" y="10" width="10" height="10" fill="rgba(255,215,0,0.02)"/></pattern></defs><rect width="100" height="100" fill="url(%23chess)"/></svg>');
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Navbar grand makeover */
+.navbar {
+    background: linear-gradient(90deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
+    backdrop-filter: blur(20px);
+    border-bottom: 2px solid var(--grand-gold);
+    box-shadow: 0 4px 20px var(--grand-shadow);
+    position: relative;
+}
+
+.navbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.navbar-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--grand-gold) !important;
+    text-shadow: 0 0 10px var(--grand-glow);
+    position: relative;
+}
+
+.navbar-brand::after {
+    content: '♔';
+    position: absolute;
+    right: -25px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--grand-gold);
+    font-size: 1.2rem;
+    text-shadow: 0 0 10px var(--grand-glow);
+}
+
+.nav-link {
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--grand-gold) !important;
+    transform: translateY(-2px);
+    text-shadow: 0 0 10px var(--grand-glow);
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--grand-gold);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::before {
+    width: 100%;
+}
+
+/* Container grand style */
+.container {
+    position: relative;
+    z-index: 10;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: linear-gradient(45deg, var(--grand-gold), var(--grand-silver), var(--grand-bronze));
+    border-radius: 20px;
+    opacity: 0.1;
+    z-index: -1;
+    filter: blur(20px);
+}
+
+/* Card grand transformation */
+.card {
+    background: var(--grand-card-bg);
+    backdrop-filter: blur(10px);
+    border: var(--grand-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--grand-shadow), 0 0 20px rgba(255, 215, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--grand-gold), var(--grand-silver), var(--grand-bronze));
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px var(--grand-shadow), 0 0 30px rgba(255, 215, 0, 0.2);
+}
+
+/* Headings grand style */
+h1, h2, h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--grand-gold) !important;
+    text-shadow: 0 0 15px var(--grand-glow);
+    position: relative;
+}
+
+h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--grand-gold), var(--grand-silver));
+    border-radius: 2px;
+}
+
+h3 {
+    font-size: 1.8rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+h3:hover {
+    transform: translateX(4px) scale(1.02);
+}
+
+/* Button grand makeover */
+.btn {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--grand-gold), var(--grand-silver));
+    color: #000;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--grand-silver), var(--grand-gold));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #666, #999);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #999, #666);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #20c997, #28a745);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Form elements grand style */
+.form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    color: var(--text-primary);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--grand-gold);
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Badge grand style */
+.badge {
+    background: linear-gradient(135deg, var(--grand-gold), var(--grand-silver));
+    color: #000;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+    display: inline-block;
+    margin: 0.25rem;
+}
+
+.badge-info {
+    background: linear-gradient(135deg, #17a2b8, #20c997);
+    color: #fff;
+}
+
+/* Profile specific grand styles */
+#playerName {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+#badgesContainer {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+#badgesContainer .badge {
+    margin: 0.5rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Row and column grand layout */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.col-md-6 {
+    flex: 1 1 45%;
+    min-width: 250px;
+}
+
+/* Footer grand style */
+footer {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
+    backdrop-filter: blur(10px);
+    border-top: 2px solid var(--grand-gold);
+    position: relative;
+}
+
+footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--grand-gold), var(--grand-silver), var(--grand-bronze));
+}
+
+/* Loading animation */
+#loadingContainer {
+    text-align: center;
+    padding: 3rem;
+}
+
+#loadingContainer p {
+    font-size: 1.5rem;
+    color: var(--grand-gold);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Responsive grand adjustments */
+@media (max-width: 768px) {
+    .container {
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-6 {
+        flex: 1 1 100%;
+    }
+}
+
+/* Dark mode adjustments for grand theme */
+[data-theme="dark"] {
+    --grand-bg-start: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+    --grand-bg-end: linear-gradient(135deg, #2d2d2d, #0a0a0a);
+    --grand-card-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+}
+
+/* Additional animations */
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+}
+
+.card:hover {
+    animation: glow 2s infinite;
+}
+
+/* Chess piece icons for flair */
+select#flairSelect option {
+    font-size: 1.2rem;
+}
+
+/* Enhanced scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--grand-gold);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--grand-silver);
+}
