@@ -1,8 +1,7 @@
 /* --------------------------------------------------
-   Modern Grand Theme — Clean, Accessible, Minimal
+   Modern Grand Theme — Bootstrap 3 Friendly
    -------------------------------------------------- */
 
-/* Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:wght@400;700&display=swap');
 
 /* Root Variables */
@@ -16,7 +15,7 @@
   --text-secondary: #4b5563;
 
   --bg-main: #f7f9fc;
-  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-card: rgba(255, 255, 255, 0.75);
 
   --border-soft: rgba(245, 215, 110, 0.35);
   --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -41,12 +40,24 @@ body {
   background: var(--bg-main);
   font-family: 'Playfair Display', serif;
   color: var(--text-primary);
-  margin: 0;
-  padding: 0;
   transition: background var(--transition), color var(--transition);
 }
 
-/* Navbar */
+/* Force Bootstrap text utilities to respect dark mode */
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .text-primary,
+[data-theme="dark"] .text-default,
+[data-theme="dark"] .text-info,
+[data-theme="dark"] .text-warning,
+[data-theme="dark"] .text-danger,
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] div,
+[data-theme="dark"] li {
+  color: var(--text-primary) !important;
+}
+
+/* Navbar (Bootstrap 3 compatible) */
 .navbar {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
@@ -58,52 +69,54 @@ body {
   background: rgba(20, 20, 20, 0.6);
 }
 
-/* Branding */
+/* Navbar Brand */
 .navbar-brand {
   font-family: Cinzel, serif;
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--gold) !important;
-  position: relative;
 }
 
 /* Nav Links */
-.nav-link {
+.navbar-nav > li > a {
   color: var(--text-primary) !important;
   font-weight: 600;
   transition: var(--transition);
 }
 
-.nav-link:hover {
+.navbar-nav > li > a:hover {
   color: var(--gold) !important;
   transform: translateY(-2px);
 }
 
-/* Cards */
-.card {
+/* Cards / Panels */
+.card,
+.panel {
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
-  border-radius: 16px;
-  padding: 1.5rem;
+  border-radius: 12px;
   box-shadow: var(--shadow-soft);
   transition: var(--transition);
 }
 
-.card:hover {
+.card:hover,
+.panel:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 30px rgba(245, 215, 110, 0.25);
+}
+
+/* Panel headings */
+.panel-heading {
+  background: transparent !important;
+  border-bottom: 1px solid var(--border-soft) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Headings */
 h1, h2, h3 {
   font-family: Cinzel, serif;
   color: var(--text-primary);
-  margin-bottom: 1rem;
   transition: var(--transition);
-}
-
-h1 {
-  font-size: 2.4rem;
 }
 
 h1:hover, h2:hover, h3:hover {
@@ -113,14 +126,14 @@ h1:hover, h2:hover, h3:hover {
 /* Buttons */
 .btn {
   border-radius: 10px;
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.3rem;
   font-weight: 600;
   transition: var(--transition);
-  border: none;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--gold), var(--bronze));
+  border: none;
   color: #000;
 }
 
@@ -131,10 +144,15 @@ h1:hover, h2:hover, h3:hover {
 
 /* Form Controls */
 .form-control {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-soft);
   border-radius: 8px;
   transition: var(--transition);
+}
+
+[data-theme="dark"] .form-control {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
 }
 
 .form-control:focus {
@@ -160,4 +178,8 @@ footer {
   padding: 1.5rem;
   text-align: center;
   color: var(--text-secondary);
+}
+
+[data-theme="dark"] footer {
+  background: rgba(20, 20, 20, 0.5);
 }
