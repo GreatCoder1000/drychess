@@ -353,7 +353,8 @@ title: Play vs Player
             }
 
             if (gameData.whitePlayerId === currentUserUid) {
-                alert("You are already in this game!");
+                // allow rejoin
+                loadGameScreen(game);
                 return;
             }
 
