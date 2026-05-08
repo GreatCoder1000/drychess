@@ -101,6 +101,14 @@ title: Player Profile
 <script src="flairs.js"></script>
 <script src="shared.js"></script>
 <script type="module">
+    const STATUSES = [
+        "👶 Starter 🐣",
+        "🔧 Developer 🔨",
+        "⚠ Violating DryChess Rules 🤬",
+        "⛔ BANNED 🚫",
+        "😁 IMPERSONATING 😉",
+        "🎃 Pumpkin's Friend 🎃"
+    ];
     let db, getDoc, doc, updateDoc;
     let currentUserUid = null;
     let profileUid = null;
@@ -221,6 +229,13 @@ title: Player Profile
                 plusBadge.textContent = "⭐ Plus Member";
                 badgesContainer.appendChild(plusBadge);
             }
+
+            const statusBadge = document.createElement("span");
+            statusBadge.className = "badge badge-warning";
+            statusBadge.style.fontSize = "1.2em";
+            statusBadge.style.marginRight = "0.5rem";
+            statusBadge.textContent = STATUSES[data.status || 0];
+            badgesContainer.appendChild(statusBadge);
 
             document.getElementById("playerRating").textContent = data.rating || 1200;
             document.getElementById("playerScore").textContent = data.xp || 0;
