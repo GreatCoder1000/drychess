@@ -1,0 +1,20 @@
+const STATUSES = [
+  "👶 Starter 🐣",
+  "🔧 Developer 🔨",
+  "⚠ Violating DryBlob Rules 🤬",
+  "⛔ BANNED 🚫",
+  "😁 IMPERSONATING 😉",
+  "🎃 Pumpkin's Friend 🎃",
+  "🔧 Developer & Moderator 🔐",
+  "😁 DryBlob Player 🎃",
+  "😁 DryBlob Friend 😁",
+  "😎 DryBlob Pro 😎",
+  "😇 DryBlob Devotee 👐",
+  "🎃 DryBlob Master 🥋",
+  "© Candidate Master Ⓜ",
+  "♟ FIDE Master Ⓜ",
+  "⁉ International Master Ⓜ",
+  "🎓 Grandmaster Ⓜ",
+  "🎓 Super Grandmaster 🤯",
+  "🤣 Fun Master 😀"
+];
