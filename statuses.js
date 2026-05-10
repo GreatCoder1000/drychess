@@ -18,7 +18,7 @@ const STATUSES = [
   "🎓 Super Grandmaster 🤯",
   "🤣 Fun Master 😀",
   "🎃true pumpkin🎃",
-  "🟡true blob🟡"
-  "🟡blob's friend😁"
+  "🟡true blob🟡",
+  "🟡blob's friend😁",
 "🧠brainrotter🤢"
 ];
