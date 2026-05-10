@@ -16,5 +16,7 @@ const STATUSES = [
   "⁉ International Master Ⓜ",
   "🎓 Grandmaster Ⓜ",
   "🎓 Super Grandmaster 🤯",
-  "🤣 Fun Master 😀"
+  "🤣 Fun Master 😀",
+  "🔇mute😶",
+  "🤚💀✋"
 ];
