@@ -3,21 +3,22 @@
     --blob: #fd8;
     --matte-black: #28282B;
 
-    /* Light mode colors */
+    /* Light mode colors - with purple-orange-blue gradient feel */
     --accent: var(--pumpkin);
-    --bg-gradient-start: #fff7f2;
-    --bg-gradient-end: #ffe1d1;
-    --navbar-bg: rgba(255, 128, 0, 0.25);
-    --navbar-border: rgba(255, 128, 0, 0.3);
-    --card-bg: #fff;
-    --card-shadow: rgba(0,0,0,0.1);
+    --bg-gradient-start: #e8d7f5;      /* Soft purple */
+    --bg-gradient-end: #fff0d6;        /* Soft orange */
+    --bg-gradient-mid: #d4e8f7;        /* Soft blue */
+    --navbar-bg: rgba(232, 107, 142, 0.15);
+    --navbar-border: rgba(255, 128, 80, 0.3);
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --card-shadow: rgba(232, 107, 142, 0.15);
     --text-primary: #333;
     --text-secondary: #666;
     --link-color: #09f;
     --logout-color: #f66;
-    --chat-bg: #f9f9f9;
-    --chat-border: #ddd;
-    --chat-message-bg: white;
+    --chat-bg: #fafbff;
+    --chat-border: #e0d4eb;
+    --chat-message-bg: #f9f7ff;
     --footer-bg: transparent;
     --footer-text: #666;
 }
@@ -25,19 +26,20 @@
 /* Dark mode colors */
 [data-theme="dark"] {
     --accent: var(--blob);
-    --bg-gradient-start: #1a1a1a;
-    --bg-gradient-end: #2d2d2d;
+    --bg-gradient-start: #2a1a3d;      /* Deep purple */
+    --bg-gradient-end: #3d2817;        /* Deep orange */
+    --bg-gradient-mid: #1a2a3d;        /* Deep blue */
     --navbar-bg: rgba(40, 40, 43, 0.9);
     --navbar-border: rgba(255, 128, 80, 0.3);
-    --card-bg: #333;
-    --card-shadow: rgba(0,0,0,0.3);
+    --card-bg: #2a2a35;
+    --card-shadow: rgba(232, 107, 142, 0.2);
     --text-primary: #e0e0e0;
     --text-secondary: #ccc;
     --link-color: #4da6ff;
     --logout-color: #ff6b6b;
-    --chat-bg: #2a2a2a;
-    --chat-border: #444;
-    --chat-message-bg: #333;
+    --chat-bg: #232530;
+    --chat-border: #3a3a45;
+    --chat-message-bg: #2a2a35;
     --footer-bg: #1a1a1a;
     --footer-text: #ccc;
 }
@@ -45,9 +47,14 @@
 body {
     font-family: Rubik, 'Segoe UI', 'Trebuchet MS', 'Arial Nova', Arial, sans-serif;
     margin: 0;
-    background: linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    background: linear-gradient(135deg, 
+        var(--bg-gradient-start) 0%, 
+        var(--bg-gradient-mid) 50%, 
+        var(--bg-gradient-end) 100%);
+    background-attachment: fixed;
     color: var(--text-primary);
     transition: background 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
 }
 
 h1, h2, h3 {
