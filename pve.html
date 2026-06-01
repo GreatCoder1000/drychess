@@ -21,11 +21,11 @@ title: Play vs Computer
                     <p>Bot Rating: <span id="currentBotRating" class="badge badge-info"></span></p>
                     <p>Your Rating: <span id="userRating" class="badge badge-info"></span></p>
 
-                    <div id="boardContainer"
-    style="margin-top: 1rem; background: linear-gradient(135deg, #d8a375, #c08a5c); width: 100%; max-width: 600px; aspect-ratio: 1; border: 2px solid #444; display: flex; justify-content: center; align-items: center;">
-    <div id="board" style="width: 100%; height: 100%;"></div>
-</div>
-<button class="btn btn-info" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+                    <div id="boardContainer" style="margin-top: 1rem; background: linear-gradient(135deg, #d8a375, #c08a5c); width: 100%; max-width: 600px; aspect-ratio: 1; border: 2px solid #444; display: flex; justify-content: center; align-items: center;">
+                        <div id="board" style="width: 100%; height: 100%;"></div>
+                    </div>
+
+                    <button class="btn btn-info fullscreen-btn" style="margin-top: 1rem;" onclick="toggleFullscreen()">⛶ Fullscreen</button>
 
                 </div>
             </div>
@@ -100,23 +100,26 @@ title: Play vs Computer
     }
 
     function toggleFullscreen() {
-    const container = document.getElementById('boardContainer');
-    const btn = event.target;
-    
-    if (container.classList.contains('fullscreen')) {
-        container.classList.remove('fullscreen');
-        document.body.classList.remove('fullscreen-active');
-        btn.textContent = '⛶ Fullscreen';
-    } else {
-        container.classList.add('fullscreen');
-        document.body.classList.add('fullscreen-active');
-        btn.textContent = '⛶ Exit Fullscreen';
+        const container = document.getElementById('boardContainer');
+        const btn = event.target;
+        
+        if (container.classList.contains('fullscreen')) {
+            container.classList.remove('fullscreen');
+            document.body.classList.remove('fullscreen-active');
+            btn.textContent = '⛶ Fullscreen';
+        } else {
+            container.classList.add('fullscreen');
+            document.body.classList.add('fullscreen-active');
+            btn.textContent = '⛶ Exit Fullscreen';
+        }
+        
+        // Redraw board to fit new size
+        if (board) {
+            setTimeout(() => {
+                board.resize();
+            }, 100);
+        }
     }
-    
-    // Redraw board to fit new size
-    if (board) board.resize();
-}
-
 
     function botMove() {
         async function executeBotMove() {
