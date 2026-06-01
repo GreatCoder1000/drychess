@@ -10,7 +10,7 @@
     --bg-gradient-mid: #d4e8f7;        /* Soft blue */
     --navbar-bg: rgba(232, 107, 142, 0.15);
     --navbar-border: rgba(255, 128, 80, 0.3);
-    --card-bg: rgba(255, 255, 255, 0.9);
+    --card-bg: rgba(255, 255, 255, 0.75);
     --card-shadow: rgba(232, 107, 142, 0.15);
     --text-primary: #333;
     --text-secondary: #666;
@@ -31,7 +31,7 @@
     --bg-gradient-mid: #1a2a3d;        /* Deep blue */
     --navbar-bg: rgba(40, 40, 43, 0.9);
     --navbar-border: rgba(255, 128, 80, 0.3);
-    --card-bg: #2a2a35;
+    --card-bg: rgba(42, 42, 53, 0.85);
     --card-shadow: rgba(232, 107, 142, 0.2);
     --text-primary: #e0e0e0;
     --text-secondary: #ccc;
@@ -63,6 +63,12 @@ body {
     min-height: 100vh;
 }
 
+body.fullscreen-active {
+    overflow: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+}
+
 h1, h2, h3 {
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif !important;
 }
@@ -77,6 +83,12 @@ h1, h2, h3 {
     border-bottom: 1px solid var(--navbar-border);
     transition: background 0.3s ease, border-color 0.3s ease;
     justify-content: space-between;
+    position: relative;
+    z-index: 1000;
+}
+
+body.fullscreen-active .navbar {
+    display: none !important;
 }
 
 .navbar-brand {
@@ -156,6 +168,7 @@ h1, h2, h3 {
     margin-bottom: 1.5rem;
     box-shadow: 0 4px 12px var(--card-shadow);
     transition: background 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(5px);
 }
 
 h3 {
@@ -168,12 +181,6 @@ h3:hover {
 }
 
 /* === Fix for dropdown layout: === */
-
-/* Make navbar appear above cards */
-.navbar {
-    position: relative;
-    z-index: 1000;
-}
 
 /* Make dropdown menus appear above cards */
 .navbar .dropdown-menu {
@@ -223,6 +230,10 @@ footer {
     transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+body.fullscreen-active footer {
+    display: none !important;
+}
+
 /* Additional dark mode styles */
 .navbar-nav .nav-link {
     color: var(--text-primary);
@@ -266,6 +277,18 @@ footer {
 }
 
 /* === FULLSCREEN BOARD STYLES === */
+main {
+    transition: all 0.3s ease;
+}
+
+body.fullscreen-active main {
+    display: none !important;
+}
+
+body.fullscreen-active #globalChatContainer {
+    display: none !important;
+}
+
 #boardContainer {
     transition: all 0.3s ease;
     position: relative;
@@ -278,7 +301,7 @@ footer {
     width: 100vw !important;
     height: 100vh !important;
     max-width: none !important;
-    z-index: 9999 !important;
+    z-index: 99999 !important;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
@@ -290,16 +313,26 @@ footer {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
+    flex-direction: column !important;
 }
 
-body.fullscreen-active {
-    overflow: hidden !important;
-    height: 100vh !important;
+#boardContainer.fullscreen #board {
+    max-width: 90vw !important;
+    max-height: 80vh !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.fullscreen-btn-wrapper {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 99998;
 }
 
 .fullscreen-btn {
     position: relative;
-    z-index: 9998;
+    z-index: 99998;
 }
 
 #board {

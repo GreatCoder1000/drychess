@@ -30,7 +30,7 @@ title: Play vs Computer
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-4" id="gameInfoColumn">
                 <div class="card">
                     <h3>Game Info</h3>
                     <p><strong>Opponent:</strong> <span id="gameBotName"></span></p>
@@ -43,6 +43,9 @@ title: Play vs Computer
         </div>
     </div>
 </div>
+
+<!-- Fullscreen Exit Button -->
+<button class="btn btn-warning fullscreen-btn-wrapper" id="fullscreenExitBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99998;" onclick="toggleFullscreen()">← Exit Fullscreen</button>
 
 <!-- Chess libraries -->
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -101,16 +104,22 @@ title: Play vs Computer
 
     function toggleFullscreen() {
         const container = document.getElementById('boardContainer');
-        const btn = event.target;
+        const gameScreen = document.getElementById('gameScreen');
+        const gameInfoCol = document.getElementById('gameInfoColumn');
+        const btn = document.getElementById('fullscreenExitBtn');
         
         if (container.classList.contains('fullscreen')) {
+            // Exit fullscreen
             container.classList.remove('fullscreen');
             document.body.classList.remove('fullscreen-active');
-            btn.textContent = '⛶ Fullscreen';
+            gameInfoCol.style.display = 'block';
+            btn.style.display = 'none';
         } else {
+            // Enter fullscreen
             container.classList.add('fullscreen');
             document.body.classList.add('fullscreen-active');
-            btn.textContent = '⛶ Exit Fullscreen';
+            gameInfoCol.style.display = 'none';
+            btn.style.display = 'block';
         }
         
         // Redraw board to fit new size
