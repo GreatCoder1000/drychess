@@ -99,6 +99,25 @@ title: Play vs Computer
         document.getElementById("gameStatus").textContent = msg;
     }
 
+    function toggleFullscreen() {
+    const container = document.getElementById('boardContainer');
+    const btn = event.target;
+    
+    if (container.classList.contains('fullscreen')) {
+        container.classList.remove('fullscreen');
+        document.body.classList.remove('fullscreen-active');
+        btn.textContent = '⛶ Fullscreen';
+    } else {
+        container.classList.add('fullscreen');
+        document.body.classList.add('fullscreen-active');
+        btn.textContent = '⛶ Exit Fullscreen';
+    }
+    
+    // Redraw board to fit new size
+    if (board) board.resize();
+}
+
+
     function botMove() {
         async function executeBotMove() {
             if (game.game_over()) {
