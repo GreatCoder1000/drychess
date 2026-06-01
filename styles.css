@@ -251,3 +251,30 @@ footer {
     border-color: var(--accent);
     box-shadow: 0 0 0 0.2rem rgba(255, 128, 80, 0.25);
 }
+
+/* Fullscreen board support */
+#boardContainer {
+    transition: all 0.3s ease;
+}
+
+#boardContainer.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    z-index: 9999;
+    margin: 0 !important;
+    border: none;
+}
+
+body.fullscreen-active {
+    overflow: hidden;
+}
+
+/* Fullscreen button styles */
+.fullscreen-btn {
+    position: relative;
+    z-index: 9998;
+}
