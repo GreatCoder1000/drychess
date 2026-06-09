@@ -317,14 +317,14 @@ body.fullscreen-active #globalChatContainer {
     justify-content: center !important;
     align-items: center !important;
     flex-direction: column !important;
-    overflow: hidden !important;
+    overflow: auto !important;
 }
 
 #boardContainer.fullscreen #board {
-    width: 80vmin !important;
-    height: 80vmin !important;
-    max-width: 80vmin !important;
-    max-height: 80vmin !important;
+    width: 90vw !important;
+    height: 90vh !important;
+    max-width: 90vw !important;
+    max-height: 90vh !important;
 }
 
 /* Mobile optimizations */
@@ -343,8 +343,8 @@ body.fullscreen-active #globalChatContainer {
     }
 
     #boardContainer.fullscreen #board {
-        width: 85vmin !important;
-        height: 85vmin !important;
+        width: 90vw !important;
+        height: 90vh !important;
     }
 
     .card {
@@ -376,10 +376,10 @@ body.fullscreen-active #globalChatContainer {
     }
 
     #boardContainer.fullscreen #board {
-        width: 85vmin !important;
-        height: 85vmin !important;
-        max-width: 85vmin !important;
-        max-height: 85vmin !important;
+        width: 90vw !important;
+        height: 90vh !important;
+        max-width: 90vw !important;
+        max-height: 90vh !important;
     }
 
     .container {
