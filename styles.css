@@ -309,7 +309,6 @@ body.fullscreen-active #globalChatContainer {
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
-    aspect-ratio: 1 / 1 !important;
     background: linear-gradient(135deg, 
         var(--bg-gradient-start) 0%, 
         var(--bg-gradient-mid) 50%, 
@@ -322,10 +321,10 @@ body.fullscreen-active #globalChatContainer {
 }
 
 #boardContainer.fullscreen #board {
-    width: 100vmin !important;
-    height: 100vmin !important;
-    max-width: 100vmin !important;
-    max-height: 100vmin !important;
+    width: 80vmin !important;
+    height: 80vmin !important;
+    max-width: 80vmin !important;
+    max-height: 80vmin !important;
 }
 
 /* Mobile optimizations */
@@ -344,8 +343,8 @@ body.fullscreen-active #globalChatContainer {
     }
 
     #boardContainer.fullscreen #board {
-        width: 100vmin !important;
-        height: 100vmin !important;
+        width: 85vmin !important;
+        height: 85vmin !important;
     }
 
     .card {
@@ -377,10 +376,10 @@ body.fullscreen-active #globalChatContainer {
     }
 
     #boardContainer.fullscreen #board {
-        width: 90vmin !important;
-        height: 90vmin !important;
-        max-width: 90vmin !important;
-        max-height: 90vmin !important;
+        width: 85vmin !important;
+        height: 85vmin !important;
+        max-width: 85vmin !important;
+        max-height: 85vmin !important;
     }
 
     .container {
