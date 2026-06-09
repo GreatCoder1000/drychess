@@ -21,8 +21,7 @@ title: Play vs Player
                     <h3>Join Game</h3>
                     <p>Enter a game ID to join an ongoing game</p>
                     <input type="text" id="gameIdInput" class="form-control" placeholder="Enter Game ID">
-                    <button class="btn btn-success btn-lg w-100" style="margin-top: 1rem;" onclick="joinGame()">Join
-                        Game</button>
+                    <button class="btn btn-success btn-lg w-100" style="margin-top: 1rem;" onclick="joinGame()">Join Game</button>
                 </div>
             </div>
         </div>
@@ -40,21 +39,20 @@ title: Play vs Player
         <div class="row">
             <div class="col-md-8">
                 <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3 id="gameTitle">Chess Game</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                        <h3 id="gameTitle" style="margin: 0;">Chess Game</h3>
                         <button class="btn btn-sm btn-danger" onclick="returnToMenu()">Exit Game</button>
                     </div>
 
                     <p id="gameStatus" style="font-style: italic; color: var(--text-secondary); margin-bottom: 0.5rem;">
                     </p>
 
-                    <div id="boardContainer"
-    style="margin-top: 1rem; background: linear-gradient(135deg, #d8a375, #c08a5c); width: 100%; max-width: 600px; aspect-ratio: 1; border: 2px solid #444; display: flex; justify-content: center; align-items: center;">
-    <div id="board" style="width: 100%; height: 100%;"></div>
-</div>
-<button class="btn btn-info" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+                    <div id="boardContainer" style="margin-top: 1rem; background: linear-gradient(135deg, #d8a375, #c08a5c); width: 100%; max-width: 600px; aspect-ratio: 1; border: 2px solid #444; display: flex; justify-content: center; align-items: center;">
+                        <div id="board" style="width: 100%; height: 100%;"></div>
+                    </div>
+                    <button class="btn btn-info fullscreen-btn" style="margin-top: 1rem;" onclick="toggleFullscreen()">⛶ Fullscreen</button>
 
-                    <div style="margin-top: 1rem;">
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button class="btn btn-warning" onclick="resignGame()" id="resignBtn">Resign</button>
                         <button class="btn btn-info" onclick="offerDraw()" id="drawBtn">Offer Draw</button>
                     </div>
@@ -100,6 +98,9 @@ title: Play vs Player
         </div>
     </div>
 </div>
+
+<!-- Fullscreen Exit Button -->
+<button class="btn btn-warning fullscreen-btn-wrapper" id="fullscreenExitBtn" style="display: none;" onclick="toggleFullscreen()">← Exit Fullscreen</button>
 
 <!-- Chess libraries -->
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -175,23 +176,33 @@ title: Play vs Player
             checkUrlForGameId();
         }
     }
-function toggleFullscreen() {
-    const container = document.getElementById('boardContainer');
-    const btn = event.target;
-    
-    if (container.classList.contains('fullscreen')) {
-        container.classList.remove('fullscreen');
-        document.body.classList.remove('fullscreen-active');
-        btn.textContent = '⛶ Fullscreen';
-    } else {
-        container.classList.add('fullscreen');
-        document.body.classList.add('fullscreen-active');
-        btn.textContent = '⛶ Exit Fullscreen';
+
+    function toggleFullscreen() {
+        const container = document.getElementById('boardContainer');
+        const gameInfoCol = document.querySelector('.col-md-4');
+        const btn = document.getElementById('fullscreenExitBtn');
+        
+        if (container.classList.contains('fullscreen')) {
+            // Exit fullscreen
+            container.classList.remove('fullscreen');
+            document.body.classList.remove('fullscreen-active');
+            if (gameInfoCol) gameInfoCol.style.display = 'block';
+            btn.style.display = 'none';
+        } else {
+            // Enter fullscreen
+            container.classList.add('fullscreen');
+            document.body.classList.add('fullscreen-active');
+            if (gameInfoCol) gameInfoCol.style.display = 'none';
+            btn.style.display = 'block';
+        }
+        
+        // Redraw board to fit new size
+        if (board) {
+            setTimeout(() => {
+                board.resize();
+            }, 100);
+        }
     }
-    
-    // Redraw board to fit new size
-    if (board) board.resize();
-}
     
     async function loadUserNickname() {
         try {
@@ -422,7 +433,7 @@ function toggleFullscreen() {
                     const row = document.createElement("div");
                     row.style.paddingBottom = "0.5rem";
                     row.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: #f5f5f5; border-radius: 3px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: #f5f5f5; border-radius: 3px; flex-wrap: wrap; gap: 0.5rem;">
                             <span><strong>${game.whiteNickname}</strong> (White) - waiting for opponent</span>
                             <button class="btn btn-sm btn-success" onclick="quickJoin('${game.gameId}')">Join as Black</button>
                         </div>
