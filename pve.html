@@ -45,7 +45,7 @@ title: Play vs Computer
 </div>
 
 <!-- Fullscreen Exit Button -->
-<button class="btn btn-warning fullscreen-btn-wrapper" id="fullscreenExitBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99998;" onclick="toggleFullscreen()">← Exit Fullscreen</button>
+<button class="btn btn-warning fullscreen-btn-wrapper" id="fullscreenExitBtn" style="display: none;" onclick="toggleFullscreen()">← Exit Fullscreen</button>
 
 <!-- Chess libraries -->
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -104,7 +104,6 @@ title: Play vs Computer
 
     function toggleFullscreen() {
         const container = document.getElementById('boardContainer');
-        const gameScreen = document.getElementById('gameScreen');
         const gameInfoCol = document.getElementById('gameInfoColumn');
         const btn = document.getElementById('fullscreenExitBtn');
         
