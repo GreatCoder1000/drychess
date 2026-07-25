@@ -80,12 +80,25 @@ title: Play vs Computer
             return;
         }
 
-        const boardConfig = {
-            draggable: true,
-            position: 'start',
-            onDrop: onPlayerMove,
-            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-        };
+     const boardConfig = {
+    draggable: true,
+    position: 'start',
+    onDragStart: function(source, piece) {
+        // Prevent moving opponent's pieces
+        if (game.turn() === 'w' && piece[0] === 'b') return false;
+        if (game.turn() === 'b' && piece[0] === 'w') return false;
+        
+        // Highlight legal moves
+        window.clearMoveHighlights();
+        window.highlightLegalMoves(game, source);
+        return true;
+    },
+    onDragEnd: function() {
+        window.clearMoveHighlights();
+    },
+    onDrop: onPlayerMove,
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+};
 
         try {
             board = Chessboard('board', boardConfig);
@@ -98,10 +111,19 @@ title: Play vs Computer
         updateGameStatus("Your turn - play white");
     }
 
-    function updateGameStatus(msg) {
-        document.getElementById("gameStatus").textContent = msg;
+function updateGameStatus(msg) {
+    let displayMsg = msg;
+    
+    if (game.in_check()) {
+        displayMsg = `<span style="color: red; font-weight: bold;">⚠ CHECK!</span> ${msg}`;
+        window.highlightCheck(game);
+    } else {
+        window.clearMoveHighlights();
     }
-
+    
+    document.getElementById("gameStatus").innerHTML = displayMsg;
+}
+    
     function toggleFullscreen() {
         const container = document.getElementById('boardContainer');
         const gameInfoCol = document.getElementById('gameInfoColumn');
