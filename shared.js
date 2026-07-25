@@ -140,3 +140,60 @@ async function updateUserRating(uid, newRating) {
     return false;
   }
 }
+/**
+ * Highlight legal moves on the board
+ * @param game - Chess.js game instance
+ * @param source - The square the piece is from (e.g., 'e2')
+ */
+window.highlightLegalMoves = function(game, source) {
+    const moves = game.moves({ square: source, verbose: true });
+    
+    moves.forEach(move => {
+        const squareElement = document.querySelector(`[data-square="${move.to}"]`);
+        if (squareElement) {
+            squareElement.classList.add('legal-move-highlight');
+        }
+    });
+};
+
+/**
+ * Clear all move highlights from the board
+ */
+window.clearMoveHighlights = function() {
+    document.querySelectorAll('.legal-move-highlight, .last-move-highlight, .check-highlight').forEach(el => {
+        el.classList.remove('legal-move-highlight', 'last-move-highlight', 'check-highlight');
+    });
+};
+
+/**
+ * Highlight the king if in check
+ * @param game - Chess.js game instance
+ */
+window.highlightCheck = function(game) {
+    if (game.in_check()) {
+        const kingSquare = findKingSquare(game);
+        if (kingSquare) {
+            const squareElement = document.querySelector(`[data-square="${kingSquare}"]`);
+            if (squareElement) {
+                squareElement.classList.add('check-highlight');
+            }
+        }
+    }
+};
+
+/**
+ * Helper to find king square
+ */
+function findKingSquare(game) {
+    const board = game.board();
+    const king = game.turn() === 'w' ? 'K' : 'k';
+    
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            if (board[i][j] && board[i][j].type === king[0].toLowerCase() && board[i][j].color === king[0] === king[0].toUpperCase() ? 'w' : 'b') {
+                return String.fromCharCode(97 + j) + (8 - i); // Convert to square notation
+            }
+        }
+    }
+    return null;
+}
