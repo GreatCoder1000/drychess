@@ -74,4 +74,83 @@ title: Dashboard
         </div>
     </div>
 </div>
-i ate white gold
+<!-- Add this near the end of the file (before the "i ate white gold" line or before </body>) -->
+<style>
+  /* Big centered overlay text */
+  #big-text {
+    display: none;
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.6);
+    z-index: 10000;
+  }
+  #big-text .content {
+    color: #fff;
+    background: rgba(0,0,0,0.35);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    pointer-events: none; /* allow container click to close */
+    font-weight: 800;
+    /* responsive huge text */
+    font-size: clamp(2.5rem, 10vw, 8rem);
+    line-height: 1;
+    text-transform: none; /* keep original casing if you want exactly "i ate white gold" */
+  }
+  #big-text .close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    pointer-events: auto; /* enable clicking the button */
+  }
+
+  /* small fade animation */
+  .fade-in { animation: fadeIn .18s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+</style>
+
+<!-- Fixed button at the bottom-right -->
+<button id="show-big-text" class="btn btn-danger"
+        style="position:fixed;bottom:20px;right:20px;z-index:10001;">
+  Say it loud
+</button>
+
+<!-- Hidden overlay that will show the giant text -->
+<div id="big-text" role="dialog" aria-hidden="true" onclick="hideBigText()">
+  <button class="close-btn" aria-label="Close" onclick="hideBigText(event)">&times;</button>
+  <div class="content" id="big-text-content">i ate white gold</div>
+</div>
+
+<script>
+  function showBigText() {
+    const el = document.getElementById('big-text');
+    el.style.display = 'flex';
+    el.classList.remove('fade-out');
+    el.classList.add('fade-in');
+    el.setAttribute('aria-hidden', 'false');
+  }
+
+  function hideBigText(e) {
+    if (e) e.stopPropagation(); // prevent the container click from re-opening
+    const el = document.getElementById('big-text');
+    el.style.display = 'none';
+    el.setAttribute('aria-hidden', 'true');
+  }
+
+  document.getElementById('show-big-text').addEventListener('click', function (e) {
+    e.stopPropagation();
+    showBigText();
+  });
+
+  // close with Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hideBigText();
+  });
+</script>
