@@ -129,6 +129,387 @@ title: Dashboard
 </div>
 
 <script>
+
+<!-- Animated "i ate white gold" overlay & trigger (replace your existing overlay snippet with this) -->
+<style>
+  :root{
+    --overlay-bg: rgba(6,10,15,0.7);
+    --panel-bg: rgba(0,0,0,0.45);
+    --text-color: #fff;
+    --accent: #ffcc00;
+    --z: 10000;
+  }
+
+  /* Trigger: pulse + slight bounce */
+  #show-big-text {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: calc(var(--z) + 3);
+    background: linear-gradient(180deg,#ff6b6b,#e03131);
+    color: white;
+    border: none;
+    padding: .6rem 1rem;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transform-origin: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    animation: btn-pulse 2200ms infinite;
+  }
+  @keyframes btn-pulse {
+    0% { transform: translateY(0); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    50% { transform: translateY(-3px) scale(1.02); box-shadow: 0 18px 38px rgba(0,0,0,.28); }
+    100% { transform: translateY(0); }
+  }
+
+  /* Overlay */
+  #big-text {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z);
+    align-items: center;
+    justify-content: center;
+    background: var(--overlay-bg);
+    padding: 1.25rem;
+    overflow: hidden;
+  }
+  #big-text.open { display: flex; }
+
+  /* Backdrop subtle pulse */
+  #big-text.open::before {
+    content: "";
+    position: absolute;
+    inset: -15%;
+    background: radial-gradient(circle at 50% 35%, rgba(255,204,0,0.06), transparent 15%);
+    animation: backdrop-pulse 3000ms infinite;
+    pointer-events: none;
+  }
+  @keyframes backdrop-pulse {
+    0% { transform: scale(0.98); opacity: .9; }
+    50% { transform: scale(1.02); opacity: 1; }
+    100% { transform: scale(0.98); opacity: .9; }
+  }
+
+  /* Panel */
+  .panel {
+    position: relative;
+    z-index: calc(var(--z) + 1);
+    max-width: 96%;
+    width: min(1100px,96%);
+    padding: 1rem 1.5rem;
+    border-radius: 14px;
+    background: var(--panel-bg);
+    box-shadow: 0 20px 55px rgba(0,0,0,0.6);
+    text-align: center;
+    overflow: visible;
+    transform-origin: center;
+    will-change: transform, opacity;
+  }
+  /* entrance */
+  .panel.enter {
+    animation: panel-in 420ms cubic-bezier(.2,.9,.25,1) both;
+  }
+  .panel.leave {
+    animation: panel-out 160ms ease both;
+  }
+  @keyframes panel-in {
+    from { transform: translateY(14px) scale(0.985); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes panel-out {
+    from { transform: translateY(0) scale(1); opacity: 1; }
+    to   { transform: translateY(8px) scale(0.995); opacity: 0; }
+  }
+
+  /* Giant text - split into letters */
+  .content {
+    color: var(--text-color);
+    font-weight: 900;
+    margin: 0;
+    line-height: 1;
+    font-size: clamp(2.5rem, 10vw, 8rem);
+    display: inline-block;
+    user-select: none;
+    -webkit-font-smoothing:antialiased;
+    position: relative;
+    overflow: visible;
+    padding: .25rem 0;
+  }
+
+  /* per-letter animation */
+  .content .letter {
+    display: inline-block;
+    transform-origin: center;
+    opacity: 0;
+    transform: translateY(12px) rotateX(10deg) scale(.9);
+    animation: letter-pop 560ms cubic-bezier(.18,.9,.28,1) forwards;
+  }
+  @keyframes letter-pop{
+    to { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
+  }
+
+  /* shimmer overlay on text */
+  .content .shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.18) 52%, transparent 100%);
+    mix-blend-mode: overlay;
+    transform: translateX(-120%);
+    pointer-events: none;
+    animation: shimmer 2200ms linear 1;
+  }
+  @keyframes shimmer {
+    to { transform: translateX(120%); }
+  }
+
+  /* close button */
+  .close-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    background: rgba(255,255,255,0.03);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.06);
+    font-size: 1.25rem;
+    padding: .25rem .45rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  /* small controls row */
+  .options { margin-top:.7rem; display:flex;gap:1rem;justify-content:center;align-items:center;color:#ddd }
+
+  /* visual confetti canvas sits above overlay but behind panel */
+  #confetti-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: calc(var(--z) + 0);
+    pointer-events: none;
+  }
+
+  /* reduced motion: stop motion-heavy animations and confetti */
+  @media (prefers-reduced-motion: reduce){
+    #show-big-text { animation: none; }
+    #big-text.open::before { animation: none; }
+    .panel.enter, .content .letter { animation: none; opacity: 1; transform: none; }
+    .content .shimmer { display: none; }
+  }
+</style>
+
+<button id="show-big-text" aria-haspopup="dialog" aria-controls="big-text" aria-expanded="false">Say it loud</button>
+
+<div id="big-text" role="dialog" aria-modal="true" aria-hidden="true">
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <div class="panel" role="document" aria-labelledby="big-text-title">
+    <button class="close-btn" id="big-text-close" aria-label="Close">&times;</button>
+    <h2 id="big-text-title" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Big message</h2>
+
+    <!-- We'll fill the letters from JS so we can stagger delays -->
+    <div class="content" id="big-text-content" tabindex="0" aria-live="polite"></div>
+    <div class="shimmer" aria-hidden="true"></div>
+
+    <div class="options">
+      <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;">
+        <input type="checkbox" id="big-text-dont-show"> Don't show again
+      </label>
+      <button id="big-text-dismiss" style="background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--text-color);padding:.35rem .6rem;border-radius:8px;cursor:pointer;">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const TRIGGER = document.getElementById('show-big-text');
+  const DIALOG = document.getElementById('big-text');
+  const PANEL = DIALOG.querySelector('.panel');
+  const CLOSE = document.getElementById('big-text-close');
+  const DISMISS = document.getElementById('big-text-dismiss');
+  const DONT = document.getElementById('big-text-dont-show');
+  const CONTENT = document.getElementById('big-text-content');
+  const CANVAS = document.getElementById('confetti-canvas');
+  const STORAGE_KEY = 'drychess_big_text_dont_show';
+  const MESSAGE = 'i ate white gold';
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Build per-letter spans so we can stagger them
+  function buildLetters(text){
+    CONTENT.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    for(let i=0;i<text.length;i++){
+      const ch = text[i];
+      const span = document.createElement('span');
+      span.className = 'letter';
+      // set a custom delay var for CSS animation
+      const delay = (i * 0.035).toFixed(3) + 's';
+      span.style.animationDelay = delay;
+      // keep spaces visual but accessible
+      span.textContent = (ch === ' ') ? '\u00A0' : ch;
+      frag.appendChild(span);
+    }
+    CONTENT.appendChild(frag);
+
+    // add shimmer element positioned relative to content
+    const shimmer = PANEL.querySelector('.shimmer');
+    // restart shimmer animation by reflow
+    if (shimmer) {
+      shimmer.style.animation = 'none';
+      // force reflow to restart
+      void shimmer.offsetWidth;
+      shimmer.style.animation = '';
+    }
+  }
+
+  // Simple confetti: lightweight particle system, stops after duration
+  function launchConfetti(duration = 1600) {
+    if (reducedMotion || !CANVAS) return;
+    const ctx = CANVAS.getContext('2d');
+    let w = CANVAS.width = CANVAS.clientWidth;
+    let h = CANVAS.height = CANVAS.clientHeight;
+    const particles = [];
+    const colors = ['#ffcc00','#ff6b6b','#9b5de5','#00c2ff','#7bf1a8'];
+    const num = 40;
+    for (let i =0;i<num;i++){
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * -h * 0.6,
+        vx: (Math.random()-0.5) * 6,
+        vy: Math.random() * 4 + 2,
+        size: Math.random() * 8 + 6,
+        rot: Math.random()*360,
+        vr: (Math.random()-0.5)*10,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        life: Math.random()*0.9 + 0.6
+      });
+    }
+
+    let start = performance.now();
+    function frame(t) {
+      const dt = t - start;
+      ctx.clearRect(0,0,w,h);
+      for (let p of particles){
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.12; // gravity
+        p.rot += p.vr;
+        ctx.save();
+        ctx.translate(p.x,p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+        ctx.restore();
+      }
+      // remove those off-screen
+      // stop after duration
+      if (t - start < duration) {
+        requestAnimationFrame(frame);
+      } else {
+        ctx.clearRect(0,0,w,h);
+      }
+    }
+    requestAnimationFrame(frame);
+    // handle resize
+    function onResize(){ w = CANVAS.width = CANVAS.clientWidth; h = CANVAS.height = CANVAS.clientHeight; }
+    window.addEventListener('resize', onResize, {once:true});
+  }
+
+  // open/close with animations + focus handling (keeps accessibility)
+  let prevFocus = null;
+  let open = false;
+  function openDialog(){
+    if (open) return;
+    prevFocus = document.activeElement;
+    buildLetters(MESSAGE);
+    DIALOG.classList.add('open');
+    PANEL.classList.remove('leave');
+    PANEL.classList.add('enter');
+    DIALOG.setAttribute('aria-hidden','false');
+    TRIGGER.setAttribute('aria-expanded','true');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    open = true;
+    // trigger confetti slightly after the letters finish a bit
+    if (!reducedMotion) {
+      setTimeout(()=> launchConfetti(1400), 420);
+    }
+    // focus the panel's content after a short delay
+    setTimeout(()=> {
+      const first = PANEL.querySelector('.close-btn') || CONTENT;
+      if (first && first.focus) first.focus();
+    }, 30);
+    document.addEventListener('keydown', onKey);
+  }
+
+  function closeDialog(saveDont) {
+    if (!open) return;
+    PANEL.classList.remove('enter');
+    PANEL.classList.add('leave');
+    DIALOG.setAttribute('aria-hidden','true');
+    TRIGGER.setAttribute('aria-expanded','false');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    open = false;
+    // hide overlay after panel-out finishes
+    setTimeout(()=> {
+      DIALOG.classList.remove('open');
+      if (prevFocus && prevFocus.focus) prevFocus.focus();
+    }, 160);
+    document.removeEventListener('keydown', onKey);
+    if (saveDont) {
+      localStorage.setItem(STORAGE_KEY, '1');
+      TRIGGER.style.display = 'none';
+    }
+  }
+
+  function onKey(e) {
+    if (!open) return;
+    if (e.key === 'Escape') { closeDialog(DONT.checked); }
+    if (e.key === 'Tab') {
+      // simple focus trap
+      const focusable = PANEL.querySelectorAll('a[href],button:not([disabled]),textarea, input, select,[tabindex]:not([tabindex="-1"])');
+      const arr = Array.from(focusable).filter(el => el.offsetParent !== null);
+      if (arr.length === 0) { e.preventDefault(); return; }
+      const first = arr[0], last = arr[arr.length-1];
+      if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+      if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+    }
+  }
+
+  // initial hide if "don't show"
+  if (localStorage.getItem(STORAGE_KEY) === '1') TRIGGER.style.display = 'none';
+
+  TRIGGER.addEventListener('click', (e)=> { e.preventDefault(); openDialog(); });
+  CLOSE.addEventListener('click', ()=> closeDialog(DONT.checked));
+  DISMISS.addEventListener('click', ()=> closeDialog(DONT.checked));
+  DIALOG.addEventListener('click', (e)=> { if (e.target === DIALOG) closeDialog(DONT.checked); });
+
+  // Optional: small keyboard helper to trigger quickly (ctrl+i)
+  document.addEventListener('keydown', (e)=> {
+    if (e.ctrlKey && e.key.toLowerCase() === 'i') {
+      e.preventDefault();
+      if (!open) openDialog(); else closeDialog(DONT.checked);
+    }
+  });
+
+  // set initial content (in case someone's scripting-disabled, this helps)
+  buildLetters(MESSAGE);
+
+  // ensure canvas fits overlay size
+  function fitCanvas(){
+    if (!CANVAS) return;
+    CANVAS.width = CANVAS.clientWidth;
+    CANVAS.height = CANVAS.clientHeight;
+  }
+  window.addEventListener('resize', fitCanvas);
+  setTimeout(fitCanvas, 60);
+})();
+</script>
+    
   function showBigText() {
     const el = document.getElementById('big-text');
     el.style.display = 'flex';
