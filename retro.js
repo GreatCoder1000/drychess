@@ -1,7 +1,7 @@
 // Konami-style "Retro Mode" toggler for DryChess
 // Place at: assets/easter/konami.js
 (function () {
-  const sequence = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  const sequence = ['a','f',];
   let pos = 0;
 
   function showBanner(text) {
