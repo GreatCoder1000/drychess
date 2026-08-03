@@ -22,5 +22,5 @@ const FLAIR_EMOJIS = [
   "🐉",
   "🐬",
   "🤣🫵",
-  " <img src="dryblobchess.ico" alt="Dry & Blob" title="Dry & Blob" height="20" width="20">",
+  "<img src="dryblobchess.ico">",
 ];
